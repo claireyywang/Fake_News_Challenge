@@ -2,6 +2,7 @@ from sklearn.svm import LinearSVC
 from sklearn.dummy import DummyClassifier
 from readfile import read_file
 from features_extraction import *
+from evaluate import score_submission, report_score
 
 
 tr_stances_file = 'dataset/train_stances.csv'
@@ -28,4 +29,7 @@ print('predicting dev dataset..')
 dev_pred = [LABELS[int(a)] for a in clf.predict(dev_X)] # predicted labels
 dev_gt = [LABELS[int(a)] for a in dev_y] # ground truth
 print('evaluating model performance...')
+
 # TODO add evaluation metric
+res = report_score(dev_gt,dev_pred)
+print('SCORE\t' + str(res))
