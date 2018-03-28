@@ -52,3 +52,9 @@ def report_score(actual,predicted):
     # your final score is what the score/best score percentage is
     print("Score: " +str(score) + " out of " + str(best_score) + "\t("+str(score*100/best_score) + "%)")
     return score*100/best_score
+
+if __name__ == "__main__":
+    actual = [0,0,0,0,1,1,0,3,3]
+    predicted = [0,0,0,0,1,1,2,3,3]
+
+    report_score([LABELS[e] for e in actual],[LABELS[e] for e in predicted])

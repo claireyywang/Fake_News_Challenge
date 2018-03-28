@@ -7,3 +7,27 @@ We then come up with a weighted evaluation method that puts higher emphasis on c
 For that reason, a higher evaluation metric is a good thing.
 
 To call the evaluation script, you merely import the functions from the evaluate.py file and you can just call report_score, which returns that evaluation metric. It also prints out a 4x4 confusion matrix, which includes the count of each true-predicted pair.
+
+The inspiration for this metric comes from the Fake News Challenge (http://www.fakenewschallenge.org/). They used this weighted evaluation metric as their competition assessment criteria. 
+
+As for sample input/output:
+
+intput: 
+true: [0,0,0,0,1,1,0,3,3]
+pred: [0,0,0,0,1,1,2,3,3]
+
+the call: report_score(true, pred)
+
+output:
+-------------------------------------------------------------
+|           |   agree   | disagree  |  discuss  | unrelated |
+-------------------------------------------------------------
+|   agree   |     4     |     0     |     1     |     0     |
+-------------------------------------------------------------
+| disagree  |     0     |     2     |     0     |     0     |
+-------------------------------------------------------------
+|  discuss  |     0     |     0     |     0     |     0     |
+-------------------------------------------------------------
+| unrelated |     0     |     0     |     0     |     2     |
+-------------------------------------------------------------
+Score: 6.75 out of 7.5	(90.0%)
