@@ -5,6 +5,9 @@ import numpy as np
 from sklearn import feature_extraction
 from tqdm import tqdm
 
+'''
+Utility functions to extract features provided by the FNC baseline. 
+'''
 
 _wnl = nltk.WordNetLemmatizer()
 

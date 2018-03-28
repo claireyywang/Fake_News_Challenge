@@ -20,11 +20,6 @@ print("Number of train, dev, test stances: " +
 print("Number of train, dev, test articles: " +
       str(len(tr_articles))+', '+str(len(dev_articles))+', '+str(len(test_articles)))
 
-print('extracting features...')
-train_X, train_y = generate_features(tr_stances, tr_articles)
-dev_X, dev_y = generate_features(dev_stances, dev_articles)
-test_X, test_y = generate_features(test_stances, test_articles)
-
 print('training model...')
 clf = DummyClassifier(strategy="most_frequent")
 clf.fit(train_X, train_y)
@@ -33,5 +28,4 @@ print('predicting dev dataset..')
 dev_pred = [LABELS[int(a)] for a in clf.predict(dev_X)] # predicted labels
 dev_gt = [LABELS[int(a)] for a in dev_y] # ground truth
 print('evaluating model performance...')
-# TODO add evaluation metric 
-
+# TODO add evaluation metric
