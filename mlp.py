@@ -19,8 +19,8 @@ tr_stances_pl = tf.placeholder(tf.int64, shape=[None], name='stances')
 
 
 def MLP(features):
-# Initialize neural network structure 
-# define 100 hidden layer 
+    # Initialize neural network structure 
+    # define 100 hidden layer 
     hidden_out = tf.contrib.layers.fully_connected(features,hidden_num,activation_fn=tf.nn.relu)
     # compute dropout 
     dropout1 = tf.nn.dropout(hidden_out, tr_keep_prob)
@@ -37,14 +37,14 @@ softmax_out = tf.nn.softmax(logits)
 pred = tf.arg_max(softmax_out, 1)
 
 
-# define loss and optimizer
+# define loss, gradients and optimizer
 tf_vars = tf.trainable_variables()
 l2_loss = tf.add_n([tf.nn.l2_loss(v)
                     for v in tf_vars if 'bias' not in v.name]) * l2_alpha
 loss_op = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(
     logits, tr_stances_pl) + l2_loss)
 optimiser = tf.train.AdamOptimizer(lr)
-grads, _ = tf.clip_by_global_norm(tf.gradients(loss, tf_vars), clip_ratio)
+grads, _ = tf.clip_by_global_norm(tf.gradients(loss_op, tf_vars), clip_ratio)
 opt_op = optimiser.apply_gradients(zip(grads, tf_vars))
 
 # Initialize the variables (i.e. assign their default value)
