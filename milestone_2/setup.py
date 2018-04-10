@@ -281,58 +281,57 @@ def pipeline_dev(dev, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
 
     return train_X, train_y
 
-# def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
-#     """
-#     Process test set
-#     Args:
-#         test: FNCData object, test set
-#         bow_vectorizer: sklearn CountVectorizer
-#         tfreq_vectorizer: sklearn TfidfTransformer(use_idf=False)
-#         tfidf_vectorizer: sklearn TfidfVectorizer()
-#
-#     Returns:
-#         test_set: list, of numpy arrays
-#     """
-#     test = []
-#     headers = {}
-#     bodies = {}
-#     cosines = {}
-#
-#     for instance in test.instances:
-#     	header = instance['Headline']
-#     	body_id = instance['Body ID']
-#     	if head not in headers:
-#
-#     # Process test set
-#     for instance in test.instances:
-#         head = instance['Headline']
-#         body_id = instance['Body ID']
-#         if head not in heads_track:
-#             head_bow = bow_vectorizer.transform([head]).toarray()
-#             head_tf = tfreq_vectorizer.transform(head_bow).toarray()[0].reshape(1, -1)
-#             head_tfidf = tfidf_vectorizer.transform([head]).toarray().reshape(1, -1)
-#             heads_track[head] = (head_tf, head_tfidf)
-#         else:
-#             head_tf = heads_track[head][0]
-#             head_tfidf = heads_track[head][1]
-#         if body_id not in bodies_track:
-#             body_bow = bow_vectorizer.transform([test.bodies[body_id]]).toarray()
-#             body_tf = tfreq_vectorizer.transform(body_bow).toarray()[0].reshape(1, -1)
-#             body_tfidf = tfidf_vectorizer.transform([test.bodies[body_id]]).toarray().reshape(1, -1)
-#             bodies_track[body_id] = (body_tf, body_tfidf)
-#         else:
-#             body_tf = bodies_track[body_id][0]
-#             body_tfidf = bodies_track[body_id][1]
-#         if (head, body_id) not in cos_track:
-#             tfidf_cos = cosine_similarity(head_tfidf, body_tfidf)[0].reshape(1, 1)
-#             cos_track[(head, body_id)] = tfidf_cos
-#         else:
-#             tfidf_cos = cos_track[(head, body_id)]
-#         feat_vec = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
-#         test_set.append(feat_vec)
-#
-#     return test_set
+def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
+    """
+    Process test set
+    Args:
+        test: FNCData object, test set
+        bow_vectorizer: sklearn CountVectorizer
+        tfreq_vectorizer: sklearn TfidfTransformer(use_idf=False)
+        tfidf_vectorizer: sklearn TfidfVectorizer()
+    Returns:
+        test_set: list, of numpy arrays
+    """
+    test = []
+    headers_track = {}
+    bodies_track = {}
+    cosines = {}
 
+    # iterate over each header/body (id)
+    for instance in test.instances:
+    	header = instance['Headline']
+    	body_id = instance['Body ID']
+    	# get tf and tfidf for header
+    	if header not in headers:
+    		header_count = bow_vectorizer.transform([header]).toarray()
+    		header_tf = tfreq_vectorizer.transform(header_count).toarray()[0].reshape(1, -1)
+    		header_tfidf = tfidf_vectorizer.transform([header]).toarray().reshape(1, -1)
+            headers_track[header] = (header_tf, header_tfidf)
+        else:
+        	header_tf = headers_track[header][0]
+            header_tfidf = headers_track[header][1]
+
+        # get tf and tfidf for body
+        if body_id not in bodies_track:
+        	body_count = bow_vectorizer.transform([test.bodies[body_id]]).toarray()
+        	body_tf = tfreq_vectorizer.transform(body_count).toarray()[0].reshape(1, -1)
+        	body_tfidf = tfidf_vectorizer.transform([test.bodies[body_id]]).toarray().reshape(1, -1)
+            bodies_track[body_id] = (body_tf, body_tfidf)
+        else:
+        	body_tf = bodies_track[body_id][0]
+            body_tfidf = bodies_track[body_id][1]
+
+        # get the cosine similarity for header and body tfidf
+        if (header, body_id) not in cosines:
+        	tfidf_cos = cosine_similarity(header_tfidf, body_tfidf)[0].reshape(1, 1)
+            cosines[(head, body_id)] = tfidf_cos
+        else:
+        	tfidf_cos = cosines[(head, body_id)]
+
+        feat_vec = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
+        test.append(feat_vec)
+
+    return test
 
 def load_model(sess):
     """
