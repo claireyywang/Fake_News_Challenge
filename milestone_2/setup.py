@@ -362,18 +362,7 @@ def save_predictions(pred, file):
 
 
 
-tr_stances_file = '../dataset/train_stances.csv'
-tr_bodies_file = '../dataset/train_bodies.csv'
-dev_stances_file = '../dataset/dev_stances.csv'
-dev_bodies_file = '../dataset/dev_bodies.csv'
-test_stances_file = '../dataset/test_stances.csv'
-test_bodies_file = '../dataset/test_bodies.csv'
 
-raw_train = FNCData(tr_stances_file, tr_bodies_file)
-raw_dev = FNCData(dev_stances_file, dev_bodies_file)
-raw_test = FNCData(test_stances_file, test_bodies_file)
-
-
-# Process data sets
-bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(raw_train, raw_dev, raw_test, lim_unigram=5000)
-train_x, train_Y = pipeline_train(raw_train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+# # Process data sets
+# bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(raw_train, raw_dev, raw_test, lim_unigram=5000)
+# train_x, train_Y = pipeline_train(raw_train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
