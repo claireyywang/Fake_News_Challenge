@@ -52,7 +52,13 @@ class FNCData:
         self.instances = self.read(file_instances)
 
         for instance in self.instances:
-        	if instance[]
+        	if instance['Headline'] not in self.headers:
+        		header_id = len(self.headers)
+        		self.headers[instance['Headline']] = header_id
+        	instance['Body ID'] = int(instance['Body ID'])
+
+        for body in bodies:
+        	self.bodies[int(body['Body ID'])] = body['articleBody']
 
     def read(self, filename):
         """
@@ -66,8 +72,9 @@ class FNCData:
 
         with open(filename, "r", encoding='utf-8') as fl:
             reader = DictReader(fl)
+            # dict reader stores a mapping for headlines as well as body
             for line in reader:
-                rows.append(line)
+                rows.append(line) 
 
         return rows
 
@@ -102,6 +109,46 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     Returns:
         test_set: list, of numpy arrays
     """
+    test = []
+    headers = {}
+    bodies = {}
+    cosines = {}
+
+    for instance in test.instances:
+    	header = instance['Headline']
+    	body_id = instance['Body ID']
+    	if head not in headers:
+
+    # Process test set
+    for instance in test.instances:
+        head = instance['Headline']
+        body_id = instance['Body ID']
+        if head not in heads_track:
+            head_bow = bow_vectorizer.transform([head]).toarray()
+            head_tf = tfreq_vectorizer.transform(head_bow).toarray()[0].reshape(1, -1)
+            head_tfidf = tfidf_vectorizer.transform([head]).toarray().reshape(1, -1)
+            heads_track[head] = (head_tf, head_tfidf)
+        else:
+            head_tf = heads_track[head][0]
+            head_tfidf = heads_track[head][1]
+        if body_id not in bodies_track:
+            body_bow = bow_vectorizer.transform([test.bodies[body_id]]).toarray()
+            body_tf = tfreq_vectorizer.transform(body_bow).toarray()[0].reshape(1, -1)
+            body_tfidf = tfidf_vectorizer.transform([test.bodies[body_id]]).toarray().reshape(1, -1)
+            bodies_track[body_id] = (body_tf, body_tfidf)
+        else:
+            body_tf = bodies_track[body_id][0]
+            body_tfidf = bodies_track[body_id][1]
+        if (head, body_id) not in cos_track:
+            tfidf_cos = cosine_similarity(head_tfidf, body_tfidf)[0].reshape(1, 1)
+            cos_track[(head, body_id)] = tfidf_cos
+        else:
+            tfidf_cos = cos_track[(head, body_id)]
+        feat_vec = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
+        test_set.append(feat_vec)
+
+    return test_set
+
 
 def load_model(sess):
     """
