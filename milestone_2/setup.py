@@ -279,7 +279,7 @@ def pipeline_dev(dev, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
         vect = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
         dev_X.append(vect)
 
-    return train_X, train_y
+    return dev_X, dev_y
 
 def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     """
@@ -331,7 +331,7 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
         feat_vec = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
         test.append(feat_vec)
 
-    return testg
+    return test
 
 def load_model(sess):
     """
