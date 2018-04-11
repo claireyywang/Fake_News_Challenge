@@ -1,4 +1,7 @@
+import random
 import tensorflow as tf
+
+# import all functions in setup module
 from setup import *
 
 tr_stances_file = 'dataset/train_stances.csv'
@@ -34,7 +37,7 @@ class_num = 4
 hidden_num = 100
 # TODO: change feature size
 tr_feature_size = len(train_X)
-epochs = 100
+epochs = 10
 
 # Create placeholders: Inserts a placeholder for a tensor that will be always fed.
 tr_features_pl = tf.placeholder(tf.float32, shape=[None, tr_feature_size], name='features')
@@ -53,6 +56,7 @@ def MLP(features):
     dropout2 = tf.nn.dropout(logits_flat, tr_keep_prob)
     return tf.reshape(dropout2, [batch_size, class_num])
 
+# compute probabilities of four classes from mlp 
 logits = MLP(tr_features_pl)
 
 # prediction
@@ -70,6 +74,24 @@ optimiser = tf.train.AdamOptimizer(lr)
 grads, _ = tf.clip_by_global_norm(tf.gradients(loss_op, tf_vars), clip_ratio)
 opt_op = optimiser.apply_gradients(zip(grads, tf_vars))
 
+# split features and stances into dictionary format batches
+# batches: a list of dicts
+def make_batch(X_pl, y_pl, X, y, kp):
+    feature_num = len(X)
+    inds = list(range(feature_num))
+    random.Random().shuffle(inds)
+    batches = []
+
+    for i in range(feature_num//batch_size):
+        batch_inds = inds[i * batch_size: (i+1)* batch_size]
+        batch_X = [X[i] for i in batch_inds]
+        batch_y = [y[i] for i in batch_inds]
+
+        kp_pl = tf.placeholder(tf.float32)
+        batch_dict = {X_pl: batch_X, y_pl: batch_y, kp_pl: kp}
+        batches.append(batch_dict)
+    return batches
+
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
@@ -80,4 +102,8 @@ with tf.Session() as sess:
     # TODO implement batch training     
     for epoch in range(epochs):
         loss = 0 
-
+        tr_dict_batches = make_batch(tr_features_pl, tr_stances_pl, train_X, train_y, tr_keep_prob)
+        for batch_dict in tr_dict_batches:
+            _, curr_loss = sess.run([opt_op, loss_op], feed_dict=batch_dict)
+            loss += curr_loss
+    
