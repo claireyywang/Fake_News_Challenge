@@ -36,7 +36,7 @@ clip_ratio = 5
 class_num = 4
 hidden_num = 100
 # TODO: change feature size
-tr_feature_size = len(train_X)
+tr_feature_size = len(train_X[0])
 epochs = 10
 
 # Create placeholders: Inserts a placeholder for a tensor that will be always fed.
