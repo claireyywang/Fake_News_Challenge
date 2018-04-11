@@ -52,13 +52,13 @@ class FNCData:
         self.instances = self.read(file_instances)
 
         for instance in self.instances:
-        	if instance['Headline'] not in self.headers:
-        		header_id = len(self.headers)
-        		self.headers[instance['Headline']] = header_id
-        	instance['Body ID'] = int(instance['Body ID'])
+            if instance['Headline'] not in self.headers:
+                header_id = len(self.headers)
+                self.headers[instance['Headline']] = header_id
+            instance['Body ID'] = int(instance['Body ID'])
 
         for body in bodies:
-        	self.bodies[int(body['Body ID'])] = body['articleBody']
+            self.bodies[int(body['Body ID'])] = body['articleBody']
 
     def read(self, filename):
         """
@@ -292,46 +292,46 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     Returns:
         test_set: list, of numpy arrays
     """
-    test = []
+    test_X = []
     headers_track = {}
     bodies_track = {}
     cosines = {}
 
     # iterate over each header/body (id)
     for instance in test.instances:
-    	header = instance['Headline']
-    	body_id = instance['Body ID']
-    	# get tf and tfidf for header
-    	if header not in headers:
-    		header_count = bow_vectorizer.transform([header]).toarray()
-    		header_tf = tfreq_vectorizer.transform(header_count).toarray()[0].reshape(1, -1)
-    		header_tfidf = tfidf_vectorizer.transform([header]).toarray().reshape(1, -1)
+        header = instance['Headline']
+        body_id = instance['Body ID']
+        # get tf and tfidf for header
+        if header not in headers_track:
+            header_count = bow_vectorizer.transform([header]).toarray()
+            header_tf = tfreq_vectorizer.transform(header_count).toarray()[0].reshape(1, -1)
+            header_tfidf = tfidf_vectorizer.transform([header]).toarray().reshape(1, -1)
             headers_track[header] = (header_tf, header_tfidf)
         else:
-        	header_tf = headers_track[header][0]
+            header_tf = headers_track[header][0]
             header_tfidf = headers_track[header][1]
 
         # get tf and tfidf for body
         if body_id not in bodies_track:
-        	body_count = bow_vectorizer.transform([test.bodies[body_id]]).toarray()
-        	body_tf = tfreq_vectorizer.transform(body_count).toarray()[0].reshape(1, -1)
-        	body_tfidf = tfidf_vectorizer.transform([test.bodies[body_id]]).toarray().reshape(1, -1)
+            body_count = bow_vectorizer.transform([test.bodies[body_id]]).toarray()
+            body_tf = tfreq_vectorizer.transform(body_count).toarray()[0].reshape(1, -1)
+            body_tfidf = tfidf_vectorizer.transform([test.bodies[body_id]]).toarray().reshape(1, -1)
             bodies_track[body_id] = (body_tf, body_tfidf)
         else:
-        	body_tf = bodies_track[body_id][0]
+            body_tf = bodies_track[body_id][0]
             body_tfidf = bodies_track[body_id][1]
 
         # get the cosine similarity for header and body tfidf
         if (header, body_id) not in cosines:
-        	tfidf_cos = cosine_similarity(header_tfidf, body_tfidf)[0].reshape(1, 1)
-            cosines[(head, body_id)] = tfidf_cos
+            tfidf_cos = cosine_similarity(header_tfidf, body_tfidf)[0].reshape(1, 1)
+            cosines[(header, body_id)] = tfidf_cos
         else:
-        	tfidf_cos = cosines[(head, body_id)]
+            tfidf_cos = cosines[(header, body_id)]
 
-        feat_vec = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
-        test.append(feat_vec)
+        feat_vec = np.squeeze(np.c_[header_tf, body_tf, tfidf_cos])
+        test_X.append(feat_vec)
 
-    return test
+    return test_X
 
 def load_model(sess):
     """
