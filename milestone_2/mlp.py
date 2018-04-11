@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+from setup import FNCData, create_vectors, pipeline_train
 # Training Parameters 
 batch_size = 500
 tr_keep_prob = 0.6
@@ -16,6 +16,7 @@ feature_size = len(features)
 # Create placeholders: Inserts a placeholder for a tensor that will be always fed.
 tr_features_pl = tf.placeholder(tf.float32, shape=[None, feature_size], name='features')
 tr_stances_pl = tf.placeholder(tf.int64, shape=[None], name='stances')
+keep_prob_pl = tf.placeholder(tf.float32)
 
 
 def MLP(features):
@@ -50,10 +51,32 @@ opt_op = optimiser.apply_gradients(zip(grads, tf_vars))
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
+num_epochs = 90
 
-# Start training
+raw_train = FNCData('dataset/train_stances.csv', 'dataset/train_bodies.csv')
+raw_dev = FNCData('dataset/dev_stances.csv', 'dataset/dev_bodies.csv')
+raw_dev = FNCData('dataset/test_stances.csv', 'dataset/test_bodies.csv')
+
+bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(raw_train, raw_dev, raw_test, lim_unigram=5000)
+train_x, train_Y = pipeline_train(raw_train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+
 with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
-    # TODO implement batch training     
+    for epoch in range(num_epochs):
+        total_loss = 0
+        indices = list(range(n_train))
+        r.shuffle(indices)
+
+        for i in range(n_train // batch_size):
+            batch_indices = indices[i * batch_size: (i + 1) * batch_size]
+            batch_features = [train_x[i] for i in batch_indices]
+            batch_stances = [train_Y[i] for i in batch_indices]
+
+            batch_feed_dict = {tr_features_pl: batch_features, tr_stances_pl: batch_stances, keep_prob_pl: tr_keep_prob}
+            _, current_loss = sess.run([opt_op, loss], feed_dict=batch_feed_dict)
+            total_loss += current_loss
+
+        test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
+        test_pred = sess.run(predict, feed_dict=test_feed_dict)
 

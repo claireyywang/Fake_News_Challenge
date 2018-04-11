@@ -360,9 +360,7 @@ def save_predictions(pred, file):
             writer.writerow({'Stance': stance_label_rev[instance]})
 
 
-
-
-
 # # Process data sets
-# bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(raw_train, raw_dev, raw_test, lim_unigram=5000)
-# train_x, train_Y = pipeline_train(raw_train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+
+
+
