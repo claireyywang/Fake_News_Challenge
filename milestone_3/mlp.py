@@ -57,19 +57,18 @@ def MLP(features):
     return tf.reshape(dropout2, [batch_size, class_num])
 
 # compute probabilities of four classes from mlp 
+print('building neural net...')
 logits = MLP(tr_features_pl)
 
 # prediction
 softmax_out = tf.nn.softmax(logits)
 pred = tf.arg_max(softmax_out, 1)
 
-import pdb; pdb.set_trace()
 # define loss, gradients and optimizer
 tf_vars = tf.trainable_variables()
 l2_loss = tf.add_n([tf.nn.l2_loss(v)
                     for v in tf_vars if 'bias' not in v.name]) * l2_alpha
-loss_op = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(
-    logits, tr_stances_pl) + l2_loss)
+loss_op = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=tr_stances_pl) + l2_loss)
 optimiser = tf.train.AdamOptimizer(lr)
 grads, _ = tf.clip_by_global_norm(tf.gradients(loss_op, tf_vars), clip_ratio)
 opt_op = optimiser.apply_gradients(zip(grads, tf_vars))
@@ -102,8 +101,11 @@ with tf.Session() as sess:
     # TODO implement batch training     
     for epoch in range(epochs):
         loss = 0 
+        print('making batches for epoch ',epoch)
         tr_dict_batches = make_batch(tr_features_pl, tr_stances_pl, train_X, train_y, tr_keep_prob)
-        for batch_dict in tr_dict_batches:
+        for i in range(len(tr_dict_batches)):
+            print('training batch: ', i)
+            batch_dict = tr_dict_batches[i]
             _, curr_loss = sess.run([opt_op, loss_op], feed_dict=batch_dict)
             loss += curr_loss
     
