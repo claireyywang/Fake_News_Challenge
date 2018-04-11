@@ -51,11 +51,6 @@ opt_op = optimiser.apply_gradients(zip(grads, tf_vars))
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
-
-# Start training
-opt_func = tf.train.AdamOptimizer(learn_rate)
-grads, _ = tf.clip_by_global_norm(tf.gradients(loss, tf_vars), clip_ratio)
-opt_op = opt_func.apply_gradients(zip(grads, tf_vars))
 num_epochs = 90
 
 raw_train = FNCData('dataset/train_stances.csv', 'dataset/train_bodies.csv')
@@ -84,5 +79,4 @@ with tf.Session() as sess:
 
         test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
         test_pred = sess.run(predict, feed_dict=test_feed_dict)
-    # TODO implement batch training     
 
