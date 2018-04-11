@@ -4,12 +4,12 @@ import tensorflow as tf
 # import all functions in setup module
 from setup import *
 
-tr_stances_file = 'dataset/train_stances.csv'
-tr_bodies_file = 'dataset/train_bodies.csv'
-dev_stances_file = 'dataset/dev_stances.csv'
-dev_bodies_file = 'dataset/dev_bodies.csv'
-test_stances_file = 'dataset/test_stances.csv'
-test_bodies_file = 'dataset/test_bodies.csv'
+tr_stances_file = '../dataset/train_stances.csv'
+tr_bodies_file = '../dataset/train_bodies.csv'
+dev_stances_file = '../dataset/dev_stances.csv'
+dev_bodies_file = '../dataset/dev_bodies.csv'
+test_stances_file = '../dataset/test_stances.csv'
+test_bodies_file = '../dataset/test_bodies.csv'
 
 
 print('loading data...')
@@ -63,7 +63,7 @@ logits = MLP(tr_features_pl)
 softmax_out = tf.nn.softmax(logits)
 pred = tf.arg_max(softmax_out, 1)
 
-
+import pdb; pdb.set_trace()
 # define loss, gradients and optimizer
 tf_vars = tf.trainable_variables()
 l2_loss = tf.add_n([tf.nn.l2_loss(v)
