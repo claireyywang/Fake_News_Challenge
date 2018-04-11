@@ -1,5 +1,27 @@
 import tensorflow as tf
-from setup import FNCData, create_vectors, pipeline_train
+from setup import *
+
+tr_stances_file = 'dataset/train_stances.csv'
+tr_bodies_file = 'dataset/train_bodies.csv'
+dev_stances_file = 'dataset/dev_stances.csv'
+dev_bodies_file = 'dataset/dev_bodies.csv'
+test_stances_file = 'dataset/test_stances.csv'
+test_bodies_file = 'dataset/test_bodies.csv'
+
+
+print('loading data...')
+train_data = FNCData(tr_stances_file, tr_bodies_file)
+dev_data = FNCData(dev_stances_file, dev_bodies_file)
+test_data = FNCData(test_stances_file, test_bodies_file)
+
+bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(train_data, dev_data, test_data, lim_unigram=5000)
+
+# extract features and labels
+print('extracting features...')
+train_X, train_y = pipeline_train(train_data, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+dev_X, dev_y = pipeline_dev(dev_data, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
+text_X = pipeline_test(test_data, bow_vectorizer,tfreq_vectorizer, tfidf_vectorizer)
+
 # Training Parameters 
 batch_size = 500
 tr_keep_prob = 0.6
@@ -11,12 +33,12 @@ clip_ratio = 5
 class_num = 4
 hidden_num = 100
 # TODO: change feature size
-feature_size = len(features)
+tr_feature_size = len(train_X)
+epochs = 100
 
 # Create placeholders: Inserts a placeholder for a tensor that will be always fed.
-tr_features_pl = tf.placeholder(tf.float32, shape=[None, feature_size], name='features')
+tr_features_pl = tf.placeholder(tf.float32, shape=[None, tr_feature_size], name='features')
 tr_stances_pl = tf.placeholder(tf.int64, shape=[None], name='stances')
-keep_prob_pl = tf.placeholder(tf.float32)
 
 
 def MLP(features):
@@ -51,32 +73,11 @@ opt_op = optimiser.apply_gradients(zip(grads, tf_vars))
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
-num_epochs = 90
-
-raw_train = FNCData('dataset/train_stances.csv', 'dataset/train_bodies.csv')
-raw_dev = FNCData('dataset/dev_stances.csv', 'dataset/dev_bodies.csv')
-raw_dev = FNCData('dataset/test_stances.csv', 'dataset/test_bodies.csv')
-
-bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(raw_train, raw_dev, raw_test, lim_unigram=5000)
-train_x, train_Y = pipeline_train(raw_train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
-
+# Start training
 with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
-    for epoch in range(num_epochs):
-        total_loss = 0
-        indices = list(range(n_train))
-        r.shuffle(indices)
-
-        for i in range(n_train // batch_size):
-            batch_indices = indices[i * batch_size: (i + 1) * batch_size]
-            batch_features = [train_x[i] for i in batch_indices]
-            batch_stances = [train_Y[i] for i in batch_indices]
-
-            batch_feed_dict = {tr_features_pl: batch_features, tr_stances_pl: batch_stances, keep_prob_pl: tr_keep_prob}
-            _, current_loss = sess.run([opt_op, loss], feed_dict=batch_feed_dict)
-            total_loss += current_loss
-
-        test_feed_dict = {features_pl: test_set, keep_prob_pl: 1.0}
-        test_pred = sess.run(predict, feed_dict=test_feed_dict)
+    # TODO implement batch training     
+    for epoch in range(epochs):
+        loss = 0 
 
