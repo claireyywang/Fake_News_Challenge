@@ -1,0 +1,2 @@
+### Instructions
+You should include a baseline.md markdown file that includes step-by-step instructions on how to run your baseline code. Your baseline.md should also report the score for your system for your test and development data, and compare that to your random baseline.

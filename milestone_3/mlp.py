@@ -11,6 +11,8 @@ dev_bodies_file = '../dataset/dev_bodies.csv'
 test_stances_file = '../dataset/test_stances.csv'
 test_bodies_file = '../dataset/test_bodies.csv'
 
+dev_pred_file = 'output/dev_predictions.csv'
+test_pred_file = 'output/test_predictions.csv'
 
 print('loading data...')
 train_data = FNCData(tr_stances_file, tr_bodies_file)
@@ -40,9 +42,9 @@ tr_feature_size = len(train_X[0])
 epochs = 10
 
 # Create placeholders: Inserts a placeholder for a tensor that will be always fed.
-tr_features_pl = tf.placeholder(tf.float32, shape=[None, tr_feature_size], name='features')
-tr_stances_pl = tf.placeholder(tf.int64, shape=[None], name='stances')
-
+features_pl = tf.placeholder(tf.float32, shape=[None, tr_feature_size], name='features')
+stances_pl = tf.placeholder(tf.int64, shape=[None], name='stances')
+kp_pl = tf.placeholder(tf.float32)
 
 def MLP(features):
     # Initialize neural network structure 
@@ -58,7 +60,7 @@ def MLP(features):
 
 # compute probabilities of four classes from mlp 
 print('building neural net...')
-logits = MLP(tr_features_pl)
+logits = MLP(features_pl)
 
 # prediction
 softmax_out = tf.nn.softmax(logits)
@@ -68,7 +70,7 @@ pred = tf.argmax(softmax_out, 1)
 tf_vars = tf.trainable_variables()
 l2_loss = tf.add_n([tf.nn.l2_loss(v)
                     for v in tf_vars if 'bias' not in v.name]) * l2_alpha
-loss_op = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=tr_stances_pl) + l2_loss)
+loss_op = tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=stances_pl) + l2_loss)
 optimiser = tf.train.AdamOptimizer(lr)
 grads, _ = tf.clip_by_global_norm(tf.gradients(loss_op, tf_vars), clip_ratio)
 opt_op = optimiser.apply_gradients(zip(grads, tf_vars))
@@ -86,7 +88,6 @@ def make_batch(X_pl, y_pl, X, y, kp):
         batch_X = [X[i] for i in batch_inds]
         batch_y = [y[i] for i in batch_inds]
 
-        kp_pl = tf.placeholder(tf.float32)
         batch_dict = {X_pl: batch_X, y_pl: batch_y, kp_pl: kp}
         batches.append(batch_dict)
     return batches
@@ -103,10 +104,22 @@ with tf.Session() as sess:
     for epoch in range(epochs):
         loss = 0 
         print('making batches for epoch ',epoch)
-        tr_dict_batches = make_batch(tr_features_pl, tr_stances_pl, train_X, train_y, tr_keep_prob)
+        tr_dict_batches = make_batch(features_pl, stances_pl, train_X, train_y, tr_keep_prob)
         for i in range(len(tr_dict_batches)):
             print('training batch: ', i)
             batch_dict = tr_dict_batches[i]
             _, curr_loss = sess.run([opt_op, loss_op], feed_dict=batch_dict)
             loss += curr_loss
     
+    # pred on dev 
+    print('predicting on dev features...')
+    dev_dict = {features_pl: dev_X, kp_pl:1.0}
+    dev_pred = sess.run(pred, feed_dict=dev_dict)
+
+    # pred on test 
+    print('predicting on test features...')
+    test_dict = {features_pl: text_X, kp_pl: 1.0}
+    test_pred = sess.run(pred, feed_dict=test_dict)
+
+save_predictions(dev_pred, dev_pred_file)
+save_predictions(test_pred, test_pred_file)
