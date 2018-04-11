@@ -94,7 +94,7 @@ def make_batch(X_pl, y_pl, X, y, kp):
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
-import pdb; pdb.set_trace()
+
 # Start training
 with tf.Session() as sess:
     # Run the initializer
