@@ -62,7 +62,7 @@ logits = MLP(tr_features_pl)
 
 # prediction
 softmax_out = tf.nn.softmax(logits)
-pred = tf.arg_max(softmax_out, 1)
+pred = tf.argmax(softmax_out, 1)
 
 # define loss, gradients and optimizer
 tf_vars = tf.trainable_variables()
@@ -94,6 +94,7 @@ def make_batch(X_pl, y_pl, X, y, kp):
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
+import pdb; pdb.set_trace()
 # Start training
 with tf.Session() as sess:
     # Run the initializer
