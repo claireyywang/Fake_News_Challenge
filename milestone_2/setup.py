@@ -119,7 +119,7 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     	header = instance['Headline']
     	body_id = instance['Body ID']
     	# get tf and tfidf for header
-    	if header not in headers:
+    	if header not in headers_track:
     		header_count = bow_vectorizer.transform([header]).toarray()
     		header_tf = tfreq_vectorizer.transform(header_count).toarray()[0].reshape(1, -1)
     		header_tfidf = tfidf_vectorizer.transform([header]).toarray().reshape(1, -1)
