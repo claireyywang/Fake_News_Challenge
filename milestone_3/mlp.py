@@ -39,7 +39,7 @@ class_num = 4
 hidden_num = 100
 # TODO: change feature size
 tr_feature_size = len(train_X[0])
-epochs = 10
+epochs = 90
 
 # Create placeholders: Inserts a placeholder for a tensor that will be always fed.
 features_pl = tf.placeholder(tf.float32, shape=[None, tr_feature_size], name='features')
