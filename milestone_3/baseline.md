@@ -13,6 +13,7 @@ With training for 90 epochs (as suggested in the paper), we achieved the followi
 
 Score: 3717.75 out of 5741.25 (64.75506205094709%)
 Confusion Matrix:
+
 |           | agree | disagree | discuss | unrelated |
 |-----------|-------|----------|---------|-----------|
 | agree     | 436   | 53       | 433     | 37        |
@@ -24,6 +25,7 @@ Confusion Matrix:
 
 Score: 3824.0 out of 5910.0	(64.70389170896784%)
 Confusion Matrix:
+
 |           | agree | disagree | discuss | unrelated |
 |-----------|-------|----------|---------|-----------|
 | agree     | 455   | 45       | 403     | 41        |
@@ -39,6 +41,7 @@ Our random baseline was a majority class classifier that simply marked all headl
 
 Score: 2258.25 out of 5741.25 (39.33376877857609%)
 Confusion Matrix:
+
 |           | agree | disagree | discuss | unrelated |
 |-----------|-------|----------|---------|-----------|
 | agree     | 0     | 0        | 0       | 959       |
@@ -50,6 +53,7 @@ Confusion Matrix:
 
 Score: 2329.0 out of 5910.0	(39.407783417935704%)
 Confusion Matrix:
+
 |           | agree | disagree | discuss | unrelated |
 |-----------|-------|----------|---------|-----------|
 | agree     | 0     | 0        | 0       | 944       |
