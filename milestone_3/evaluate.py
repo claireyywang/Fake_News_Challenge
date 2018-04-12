@@ -58,7 +58,7 @@ def report_score(actual,predicted):
 
 def get_stances_from_csv(filename):
     stances = []
-    with open(sys.argv[1], 'r') as f:
+    with open(filename, 'r') as f:
         r = DictReader(f)
         for line in r:
             stances.append(line['Stance'])
