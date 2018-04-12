@@ -32,10 +32,18 @@ print('training model...')
 clf = DummyClassifier(strategy="most_frequent")
 clf.fit(train_X, train_y)
 
-print('predicting dev dataset..')
-dev_pred = [LABELS[int(a)] for a in clf.predict(test_X)] # predicted labels
-dev_gt = [LABELS[int(a)] for a in test_y] # ground truth
-print('evaluating model performance...')
+print('predicting test dataset..')
+test_pred = [LABELS[int(a)] for a in clf.predict(test_X)] # predicted labels
+test_gt = [LABELS[int(a)] for a in test_y] # ground truth
 
-# TODO add evaluation metric
-res = report_score(dev_gt,dev_pred)
+print('predicting dev dataset..')
+dev_pred = [LABELS[int(a)] for a in clf.predict(dev_X)] # predicted labels
+dev_gt = [LABELS[int(a)] for a in dev_y] # ground truth
+
+print('evaluating model performance...')
+print('===============================')
+print('Test Dataset Performance:')
+test_res = report_score(test_gt,test_pred)
+print('===============================')
+print('Dev Dataset Performance:')
+dev_res = report_score(dev_gt, dev_pred)
