@@ -9,7 +9,7 @@ Once these stances have been generated, you can evaluate the performance of a pa
 ### Current System
 With training for 90 epochs (as suggested in the paper), we achieved the following scores for our system:
 
-##### Test
+#### Test
 
 Score: 3717.75 out of 5741.25 (64.75506205094709%)
 Confusion Matrix:
@@ -21,7 +21,7 @@ Confusion Matrix:
 | discuss   | 552   | 194      | 1364    | 94        |
 | unrelated | 1451  | 889      | 653     | 6040      |
 
-##### Dev
+#### Dev
 
 Score: 3824.0 out of 5910.0	(64.70389170896784%)
 Confusion Matrix:
@@ -37,7 +37,7 @@ Confusion Matrix:
 
 Our random baseline was a majority class classifier that simply marked all headlines as "unrelated". We achieved the following scores:
 
-##### Test
+#### Test
 
 Score: 2258.25 out of 5741.25 (39.33376877857609%)
 Confusion Matrix:
@@ -49,7 +49,7 @@ Confusion Matrix:
 | discuss   | 0     | 0        | 0       | 2204      |
 | unrelated | 0     | 0        | 0       | 9033      |
 
-##### Dev
+#### Dev
 
 Score: 2329.0 out of 5910.0	(39.407783417935704%)
 Confusion Matrix:
