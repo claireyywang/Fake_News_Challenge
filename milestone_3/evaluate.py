@@ -75,5 +75,3 @@ if __name__ == "__main__":
     pred = get_stances_from_csv(sys.argv[2])
 
     report_score(gold, pred)
-
-    # report_score([LABELS[e] for e in actual],[LABELS[e] for e in predicted])
