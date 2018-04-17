@@ -37,8 +37,13 @@ clip_ratio = 5
 # Network Parameters
 class_num = 4
 hidden_num = 100
-# TODO: change feature size
+
+"""
+TODO: change feature size
+
+"""
 tr_feature_size = len(train_X[0])
+
 epochs = 90
 
 # Create placeholders: Inserts a placeholder for a tensor that will be always fed.
@@ -100,16 +105,14 @@ init = tf.global_variables_initializer()
 with tf.Session() as sess:
     # Run the initializer
     sess.run(init)
-    # TODO implement batch training     
+    # train the batches for the specified number of epochs
     for epoch in range(epochs):
-        loss = 0 
-        print('making batches for epoch ',epoch)
-        tr_dict_batches = make_batch(features_pl, stances_pl, train_X, train_y, tr_keep_prob)
-        for i in range(len(tr_dict_batches)):
-            print('training batch: ', i)
-            batch_dict = tr_dict_batches[i]
-            _, curr_loss = sess.run([opt_op, loss_op], feed_dict=batch_dict)
-            loss += curr_loss
+    	"""
+    	TODO: Implement batch training for the neural network. Use the make_batch function to
+    		  create the appropriate batches from the features and labels defined above. In
+    		  addition, make sure to keep track of the loss that occurs over each batch.
+
+   		"""  
     
     # pred on dev 
     print('predicting on dev features...')
