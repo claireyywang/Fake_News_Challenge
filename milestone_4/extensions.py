@@ -2,22 +2,24 @@ import numpy as np
 import re
 import nltk
 
-refuting_words = [
+fake_indicators = [
+  'bogus',
   'fake',
+  'fraudulent',
+  'forged',
+  'mock',
+  'false',
+  'phony',
+  'despite',
+  'fictitious',
+  'dubious',
+  'sham',
   'fraud',
   'hoax',
-  'false',
   'deny',
   'denies',
-  'not',
-  'despite',
-  'nope',
   'doubt',
-  'doubts',
-  'bogus',
-  'debunk',
-  'pranks',
-  'retract'
+  'doubts'
 ]
 wnl = nltk.WordNetLemmatizer()
 
@@ -34,7 +36,7 @@ def filter_refutation(titles, articles):
   for i in range(len(titles)):
     title, _ = titles[i], articles[i]
     title_tokens = tokenize(title)
-    features = [1 if word in title_tokens else 0 for word in refuting_words]
+    features = [1 if word in title_tokens else 0 for word in fake_indicators]
     X.append(features)
   return X
 
@@ -56,8 +58,8 @@ def compute_polarity(titles, articles):
     title_tokens = tokenize(title)
     article_tokens = tokenize(article)
     features = []
-    title_polarity = sum([t in refuting_words for t in title_tokens]) % 2
-    article_polarity = sum([t in refuting_words for t in article_tokens]) % 2
+    title_polarity = sum([t in fake_indicators for t in title_tokens]) % 2
+    article_polarity = sum([t in fake_indicators for t in article_tokens]) % 2
     features.append(title_polarity)
     features.append(article_polarity)
     X.append(features)
