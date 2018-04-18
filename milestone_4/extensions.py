@@ -1,8 +1,6 @@
+import numpy as np
 import re
 import nltk
-import numpy as np
-
-wnl = nltk.WordNetLemmatizer()
 
 refuting_words = [
   'fake',
@@ -11,7 +9,6 @@ refuting_words = [
   'false',
   'deny',
   'denies',
-  'refute',
   'not',
   'despite',
   'nope',
@@ -22,6 +19,7 @@ refuting_words = [
   'pranks',
   'retract'
 ]
+wnl = nltk.WordNetLemmatizer()
 
 def tokenize(s):
   tokens = []
@@ -30,50 +28,50 @@ def tokenize(s):
     tokens.append(wnl.lemmatize(t).lower())
   return tokens
 
-def word_overlap_features(headlines, body_articles):
+
+def filter_refutation(titles, articles):
   X = []
-  for i in range(len(headlines)):
-    headline, article = headlines[i], body_articles[i]
-    headline_tokens = tokenize(headline)
+  for i in range(len(titles)):
+    title, _ = titles[i], articles[i]
+    title_tokens = tokenize(title)
+    features = [1 if word in title_tokens else 0 for word in refuting_words]
+    X.append(features)
+  return X
+
+def compute_overlap_frac(titles, articles):
+  X = []
+  for i in range(len(titles)):
+    title, article = titles[i], articles[i]
+    title_tokens = tokenize(title)
     article_tokens = tokenize(article)
-    features = [len(set(headline_tokens).intersection(article_tokens))/float(len(set(headline_tokens).union(article_tokens)))]
+    features = [len(set(title_tokens).intersection(article_tokens))/float(len(set(title_tokens).union(article_tokens)))]
     X.append(features)
   return X
 
 
-def refuting_features(headlines, body_articles):
+def compute_polarity(titles, articles):
   X = []
-  for i in range(len(headlines)):
-    headline, _ = headlines[i], body_articles[i]
-    headline_tokens = tokenize(headline)
-    features = [1 if word in headline_tokens else 0 for word in refuting_words]
-    X.append(features)
-  return X
-
-
-def polarity_features(headlines, body_articles):
-  X = []
-  for i in range(len(headlines)):
-    headline, article = headlines[i], body_articles[i]
-    headline_tokens = tokenize(headline)
+  for i in range(len(titles)):
+    title, article = titles[i], articles[i]
+    title_tokens = tokenize(title)
     article_tokens = tokenize(article)
     features = []
-    headline_polarity = sum([t in refuting_words for t in headline_tokens]) % 2
+    title_polarity = sum([t in refuting_words for t in title_tokens]) % 2
     article_polarity = sum([t in refuting_words for t in article_tokens]) % 2
-    features.append(headline_polarity)
+    features.append(title_polarity)
     features.append(article_polarity)
     X.append(features)
   return X
 
 def generate_extended_features(instances, FNCdata):
-  headlines, body_articles = [], []
+  titles, articles = [], []
 
   for instance in instances:
-    headlines.append(instance['Headline'])
-    body_articles.append(FNCdata.bodies[instance['Body ID']])
+    titles.append(instance['Headline'])
+    articles.append(FNCdata.bodies[instance['Body ID']])
 
-  X_overlap = word_overlap_features(headlines, body_articles)
-  X_refuting = refuting_features(headlines, body_articles)
-  X_polarity = polarity_features(headlines, body_articles)
+  X_overlap = compute_overlap_frac(titles, articles)
+  X_refuting = filter_refutation(titles, articles)
+  X_polarity = compute_polarity(titles, articles)
 
   return np.c_[X_polarity, X_refuting, X_overlap]
