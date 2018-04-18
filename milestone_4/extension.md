@@ -6,7 +6,7 @@ This extension implementation used the same file structure as published baseline
 
 ## Extension Description
 
-This extension is built on the original structure of multiperceptation neural network model. Instead of just using the TF of headlines, TF of body articles and the cosine of TF-IDF for the headline/article pair, we appended three more features to the feature set: overlapping words, filtered refuting words and word polarity. Overlapping words feature computes the fraction of word tokens used in both headline and body article among all tokens used in headline and article; filtered refuting word feature shows whether a refuting word (among a defined list of refuting words) showed up in the headline; word polarity calculates the number of refuting words in headline or body article. Each of them represents a property of texts appeared in headline and article pairs. The implementation of extension can be found in `extensions.py`.
+This extension is built on the original structure of multiperceptation neural network model. Instead of just using the TF of headlines, TF of body articles and the cosine of TF-IDF for the headline/article pair, we appended three more features to the feature set: overlapping fraction, fake indicating words and word polarities. Overlapping fraction computes the fraction of word tokens used in both headline and body article among all tokens used in headline and article; fake indicating words filters defined indicating words from showed up in the headline; word polarities calculate the number of indicating words in headline or body article. Each of them represents a property of texts appeared in headline and article pairs. The implementation of extension can be found in `extensions.py`.
 
 ## Performance
 

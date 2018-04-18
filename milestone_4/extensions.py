@@ -31,7 +31,7 @@ def tokenize(s):
   return tokens
 
 
-def filter_refutation(titles, articles):
+def filter_fake_words(titles, articles):
   X = []
   for i in range(len(titles)):
     title, _ = titles[i], articles[i]
@@ -46,8 +46,8 @@ def compute_overlap_frac(titles, articles):
     title, article = titles[i], articles[i]
     title_tokens = tokenize(title)
     article_tokens = tokenize(article)
-    features = [len(set(title_tokens).intersection(article_tokens))/float(len(set(title_tokens).union(article_tokens)))]
-    X.append(features)
+    frac = len(set(title_tokens).intersection(article_tokens)) / float(len(set(title_tokens).union(article_tokens)))
+    X.append([frac])
   return X
 
 
@@ -57,12 +57,12 @@ def compute_polarity(titles, articles):
     title, article = titles[i], articles[i]
     title_tokens = tokenize(title)
     article_tokens = tokenize(article)
-    features = []
+    polarities = []
     title_polarity = sum([t in fake_indicators for t in title_tokens]) % 2
     article_polarity = sum([t in fake_indicators for t in article_tokens]) % 2
-    features.append(title_polarity)
-    features.append(article_polarity)
-    X.append(features)
+    polarities.append(title_polarity)
+    polarities.append(article_polarity)
+    X.append(polarities)
   return X
 
 def generate_extended_features(instances, FNCdata):
@@ -73,7 +73,7 @@ def generate_extended_features(instances, FNCdata):
     articles.append(FNCdata.bodies[instance['Body ID']])
 
   X_overlap = compute_overlap_frac(titles, articles)
-  X_refuting = filter_refutation(titles, articles)
+  X_refuting = filter_fake_words(titles, articles)
   X_polarity = compute_polarity(titles, articles)
 
   return np.c_[X_polarity, X_refuting, X_overlap]
