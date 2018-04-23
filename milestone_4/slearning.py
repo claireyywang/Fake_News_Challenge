@@ -1,7 +1,7 @@
 import random
 
 # import all functions in setup module
-from extended_setup import *
+from extended_setup_two import *
 from evaluate import score_submission, report_score, get_stances_from_csv
 from sklearn.linear_model import LogisticRegression
 
@@ -14,6 +14,8 @@ test_bodies_file = '../dataset/test_bodies.csv'
 
 dev_pred_file = 'output/dev_predictions.csv'
 test_pred_file = 'output/test_predictions.csv'
+
+LABELS = ['agree', 'disagree', 'discuss', 'unrelated']
 
 print('loading data...')
 train_data = FNCData(tr_stances_file, tr_bodies_file)
@@ -35,12 +37,14 @@ clf = LogisticRegression(penalty='l2')
 clf.fit(train_X, train_y)
 
 print('predicting test dataset..')
-test_pred = [LABELS[int(a)] for a in clf.predict(test_X)] # predicted labels
-test_gt = [LABELS[int(a)] for a in test_y] # ground truth
+#test_pred = [LABELS[int(a)] for a in clf.predict(test_X)] # predicted labels
+#test_gt = [LABELS[int(a)] for a in test_y] # ground truth
+test_pred = clf.predict(test_X) # predicted labels
+test_gt = test_y # ground truth
 
 print('predicting dev dataset..')
-dev_pred = [LABELS[int(a)] for a in clf.predict(dev_X)] # predicted labels
-dev_gt = [LABELS[int(a)] for a in dev_y] # ground truth
+dev_pred = clf.predict(dev_X) # predicted labels
+dev_gt = dev_y # ground truth
 
 print('evaluating model performance...')
 print('===============================')
