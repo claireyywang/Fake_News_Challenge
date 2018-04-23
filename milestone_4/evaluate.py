@@ -13,12 +13,19 @@ def score_submission(gold_labels, test_labels):
           [0, 0, 0, 0],
           [0, 0, 0, 0]]
 
-    """
-    TODO: Iterate through the gold labels and test lables, calculating the appropriate score
-          for each prediction based on the metric in the writeup. Also, update the confusion
-          matrix to include counts for each true-pred pair.
+    for i, (g, t) in enumerate(zip(gold_labels, test_labels)):
+        g_stance, t_stance = g, t
+        if g_stance == t_stance:
+            # 25% weighting if it's the same stance
+            score += 0.25
+            # aim for 75% weighting if it's same stance AND it's agree, disagree, or discuss
+            if g_stance != 'unrelated':
+                score += 0.50
+        if g_stance in RELATED and t_stance in RELATED:
+            score += 0.25
 
-    """
+        # confusion matrix includes counts for each true-pred pair
+        cm[LABELS.index(g_stance)][LABELS.index(t_stance)] += 1
 
     return score, cm
 
