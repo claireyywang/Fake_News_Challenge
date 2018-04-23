@@ -72,8 +72,6 @@ clf_stage_two.fit(train_X_stage_two, train_y_stage_two)
 print('predicting...')
 
 dev_y_pred_stage_one = clf_stage_one.predict(dev_X)
-print(dev_y_stage_one[:10])
-print(dev_y_pred_stage_one[:10])
 print('dev stage 1 f1 score {}'.format(f1_score(dev_y_stage_one, dev_y_pred_stage_one)))
 
 # we now focus only on examples we predicted to be related
@@ -90,3 +88,29 @@ dev_y_stage_two = np.array(dev_y_stage_two)
 dev_y_pred_stage_two = clf_stage_two.predict(dev_X_stage_two)
 
 print('dev stage 2 f1 score {}'.format(f1_score(dev_y_stage_two, dev_y_pred_stage_two, average='micro')))
+
+# predict test set
+
+# we start by assuming that everything is unrelated
+all_preds = np.full(len(test_X), stance_label['unrelated'])
+
+train_y_pred_stage_one = clf_stage_one.predict(test_X)
+
+# build up test_X_stage_two
+test_X_stage_two = []
+test_X_stage_two_indices = []
+for i, yi in enumerate(train_y_pred_stage_one):
+    if stage_one_map_rev[yi] == 'related':
+        test_X_stage_two.append(test_X[i])
+        test_X_stage_two_indices.append(i)
+test_X_stage_two = np.array(test_X_stage_two)
+test_X_stage_two_indices = np.array(test_X_stage_two_indices)
+
+test_y_stage_two_pred = clf_stage_two.predict(test_X_stage_two)
+for test_X_index, pred in zip(test_X_stage_two_indices, test_y_stage_two_pred):
+    all_preds[test_X_index] = pred
+
+with open('test_preds.txt', 'w') as f:
+    f.write('Stance\n')
+    for pred in all_preds:
+        f.write(stance_label_rev[pred] + '\n')
