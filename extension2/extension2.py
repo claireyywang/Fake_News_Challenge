@@ -4,6 +4,10 @@ from stanfordcorenlp import StanfordCoreNLP
 from collections import Counter
 import json
 from pprint import pprint
+from nltk.corpus import stopwords
+
+
+from sklearn.feature_extraction.text import CountVectorizer
 
 nlp = StanfordCoreNLP('stanford-corenlp-full-2018-02-27/', lang='en')
 
@@ -28,22 +32,29 @@ nlp_props = {
     'outputFormat': 'json'
 }
 
-all_ngrams = {i : Counter() for i in range(1, 6 + 1)}
-print(all_ngrams)
+max_n = 6
+stopwords = stopwords.words('english')
+
+
+all_ngrams = {i : Counter() for i in range(1, max_n + 1)}
 
 # TODO: do we want to convert the original ngrams to strings
-def ngrams_from_tokens(tokens, max_n, is_body):
+def ngrams_from_tokens(tokens, max_n):
+    # map from n -> ngrams
     output = {}
-    output[1] = Counter(tokens)
+    
+    # remove stopwords from ngrams when n=1
+    one_grams = Counter(tokens)
+    for w in stopwords:
+        one_grams[w] = 0
+    output[1] = one_grams
+    
     for n in range(2, max_n + 1):
         ngrams = []
         for i in range(len(tokens) - n + 1):
             ngrams.append(' '.join(tokens[i:i + n]))
-        n_tf = Counter(ngrams)
-        if is_body:
-            for term in n_tf.keys():
-                all_ngrams[n][term] += 1
-        output[n] = n_tf
+        output[n] = Counter(ngrams)
+    
     return output
 
 def lemmatize_text(text):
@@ -56,46 +67,29 @@ def lemmatize_text(text):
 
     return lemmatized_tokens
 
-# print(len(train_data.bodies))
-# print(len(train_data.instances))
-
 body_tfs = {}
+
+
+pprint(stopwords.words('english'))
+
+# mapping from body mapping to X array index
 
 for body_id, body_text in train_data.bodies.items():
     body_tokens = lemmatize_text(body_text)
-    tfs = ngrams_from_tokens(body_tokens, 6, is_body=True)
+    
+
+    pprint(body_tokens)
+    tfs = ngrams_from_tokens(body_tokens, 6)
     body_tfs[body_id] = tfs
-
-# print(all_ngrams)
-
-pprint(all_ngrams[2].most_common(5))
-
-
-# idfs = {}
-
-# def get_idf(s, n):
-
 
 
 # for instance in train_data.instances:
 #     body_text = train_data.bodies[instance['Body ID']]
 #     header_text = instance['Headline']
-    
-#     header_tokens = lemmatize_text(header_text)
 
-    
-#     pprint(ngrams_from_tokens(header_tokens, 6))
-
-#     pprint(all_ngrams)
-
-#     exit()
-
-
-    
-    # 
-    # pprint()
-    
-    # exit()
+    # header_tokens = lemmatize_text(header_text)
+    # pprint(ngrams_from_tokens(header_tokens, 6))
+    # pprint(all_ngrams)
 
 
 # print(body_id)
