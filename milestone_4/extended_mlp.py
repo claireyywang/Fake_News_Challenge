@@ -25,7 +25,7 @@ bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(train_data, 
 print('extracting features...')
 train_X, train_y = pipeline_train(train_data, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 dev_X, dev_y = pipeline_dev(dev_data, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
-text_X = pipeline_test(test_data, bow_vectorizer,tfreq_vectorizer, tfidf_vectorizer)
+test_X = pipeline_test(test_data, bow_vectorizer,tfreq_vectorizer, tfidf_vectorizer)
 
 # Training Parameters 
 batch_size = 500
@@ -118,7 +118,7 @@ with tf.Session() as sess:
 
     # pred on test 
     print('predicting on test features...')
-    test_dict = {features_pl: text_X, kp_pl: 1.0}
+    test_dict = {features_pl: test_X, kp_pl: 1.0}
     test_pred = sess.run(pred, feed_dict=test_dict)
 
 save_predictions(dev_pred, dev_pred_file)
