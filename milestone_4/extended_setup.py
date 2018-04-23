@@ -214,8 +214,8 @@ def pipeline_train(train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     
     train_X = np.array(train_X)
     # added features from extension1, X_polarity, X_refuting, X_overlap
-    # extended_feats = generate_extended_features(train.instances, train)
-    # train_X = np.hstack((train_X, extended_feats))
+    extended_feats = generate_extended_features(train.instances, train)
+    train_X = np.hstack((train_X, extended_feats))
 
     return train_X, train_y
 
@@ -278,8 +278,8 @@ def pipeline_dev(dev, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
 
     dev_X = np.array(dev_X)
     # added features from extension1, X_polarity, X_refuting, X_overlap
-    # extended_feats = generate_extended_features(dev.instances, dev)
-    # dev_X = np.hstack((dev_X, extended_feats))
+    extended_feats = generate_extended_features(dev.instances, dev)
+    dev_X = np.hstack((dev_X, extended_feats))
 
     return dev_X, dev_y
 
@@ -335,8 +335,8 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
 
     test_X = np.array(test_X)
     # added features from extension1, X_polarity, X_refuting, X_overlap
-    # extended_feats = generate_extended_features(test.instances, test)
-    # test_X = np.hstack((test_X, extended_feats))
+    extended_feats = generate_extended_features(test.instances, test)
+    test_X = np.hstack((test_X, extended_feats))
     
     return test_X
 
