@@ -2,6 +2,7 @@ from extended_setup import *
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 
+
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'
 dev_stances_file = '../dataset/dev_stances.csv'
