@@ -7,6 +7,8 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from extensions import generate_extended_features
+
 # Initializing global data structures
 stance_label = {'agree': 0, 'disagree': 1, 'discuss': 2, 'unrelated': 3}
 stance_label_rev = {0: 'agree', 1: 'disagree', 2: 'discuss', 3: 'unrelated'}
@@ -174,11 +176,12 @@ def pipeline_train(train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
 
     train_X = []
     train_y = []
-
+    
+    
     for instance in train.instances:
 
         # track the true classification label
-        train_y.append(stance_label[instance['Stance']])
+        train_y.append(instance['Stance'])
 
         head = instance['Headline']
         b_id = instance['Body ID']
@@ -208,6 +211,11 @@ def pipeline_train(train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
 
         vect = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
         train_X.append(vect)
+    
+    train_X = np.array(train_X)
+    # added features from extension1, X_polarity, X_refuting, X_overlap
+    extended_feats = generate_extended_features(train.instances, train)
+    train_X = np.hstack((train_X, extended_feats))
 
     return train_X, train_y
 
@@ -237,7 +245,7 @@ def pipeline_dev(dev, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     for instance in dev.instances:
 
         # track the true classification label
-        dev_y.append(stance_label[instance['Stance']])
+        dev_y.append(instance['Stance'])
 
         head = instance['Headline']
         b_id = instance['Body ID']
@@ -268,6 +276,11 @@ def pipeline_dev(dev, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
         vect = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
         dev_X.append(vect)
 
+    dev_X = np.array(dev_X)
+    # added features from extension1, X_polarity, X_refuting, X_overlap
+    extended_feats = generate_extended_features(dev.instances, dev)
+    dev_X = np.hstack((dev_X, extended_feats))
+
     return dev_X, dev_y
 
 def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
@@ -290,16 +303,6 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
 
     # iterate over each header/body (id)
     for instance in test.instances:
-<<<<<<< HEAD:milestone_2/setup.py
-    	header = instance['Headline']
-    	body_id = instance['Body ID']
-    	# get tf and tfidf for header
-    	if header not in headers_track:
-    		header_count = bow_vectorizer.transform([header]).toarray()
-    		header_tf = tfreq_vectorizer.transform(header_count).toarray()[0].reshape(1, -1)
-    		header_tfidf = tfidf_vectorizer.transform([header]).toarray().reshape(1, -1)
-            headers_track[header] = (header_tf, header_tfidf)
-=======
 
         head = instance['Headline']
         b_id = instance['Body ID']
@@ -310,7 +313,6 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
             head_tf = tfreq_vectorizer.transform(head_bow).toarray()[0].reshape(1, -1)
             head_tfidf = tfidf_vectorizer.transform([head]).toarray().reshape(1, -1)
             heads_unique[head] = (head_tf, head_tfidf)
->>>>>>> 44b4239b84bf9d683a8276ea4dc0b4e19f64cda1:milestone_3/setup.py
         else:
             head_tf = heads_unique[head][0]
             head_tfidf = heads_unique[head][1]
@@ -331,6 +333,11 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
         vect = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
         test_X.append(vect)
 
+    test_X = np.array(test_X)
+    # added features from extension1, X_polarity, X_refuting, X_overlap
+    extended_feats = generate_extended_features(test.instances, test)
+    test_X = np.hstack((test_X, extended_feats))
+    
     return test_X
 
 def load_model(sess):

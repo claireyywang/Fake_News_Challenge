@@ -1,6 +1,9 @@
+import random
+
+# import all functions in setup module
 from extended_setup_two import *
-from evaluate import get_stances_from_csv , report_score
-from sklearn.svm import LinearSVC
+from evaluate import score_submission, report_score, get_stances_from_csv
+from sklearn.linear_model import LogisticRegression
 
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'
@@ -11,6 +14,8 @@ test_bodies_file = '../dataset/test_bodies.csv'
 
 dev_pred_file = 'output/dev_predictions.csv'
 test_pred_file = 'output/test_predictions.csv'
+
+LABELS = ['agree', 'disagree', 'discuss', 'unrelated']
 
 print('loading data...')
 train_data = FNCData(tr_stances_file, tr_bodies_file)
@@ -25,9 +30,26 @@ train_X, train_y = pipeline_train(train_data, bow_vectorizer, tfreq_vectorizer, 
 dev_X, dev_y = pipeline_dev(dev_data, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 test_X = pipeline_test(test_data, bow_vectorizer,tfreq_vectorizer, tfidf_vectorizer)
 test_y = get_stances_from_csv(test_stances_file)
-print('training  data...')
 
-clf = LinearSVC(C=10, max_iter=100, dual=False)
+# extract features and labels
+print('building model...')
+clf = LogisticRegression(penalty='l2')
 clf.fit(train_X, train_y)
-pred_y = clf.predict(test_X)
-print(report_score(test_y, pred_y))
+
+print('predicting test dataset..')
+#test_pred = [LABELS[int(a)] for a in clf.predict(test_X)] # predicted labels
+#test_gt = [LABELS[int(a)] for a in test_y] # ground truth
+test_pred = clf.predict(test_X) # predicted labels
+test_gt = test_y # ground truth
+
+print('predicting dev dataset..')
+dev_pred = clf.predict(dev_X) # predicted labels
+dev_gt = dev_y # ground truth
+
+print('evaluating model performance...')
+print('===============================')
+print('Test Dataset Performance:')
+test_res = report_score(test_gt,test_pred)
+print('===============================')
+print('Dev Dataset Performance:')
+dev_res = report_score(dev_gt, dev_pred)

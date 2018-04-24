@@ -1,6 +1,5 @@
-from extended_setup_two import *
-from evaluate import get_stances_from_csv , report_score
-from sklearn.svm import LinearSVC
+from extended_setup import *
+from sklearn.svm import SVC 
 
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'
@@ -24,10 +23,7 @@ print('extracting features...')
 train_X, train_y = pipeline_train(train_data, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 dev_X, dev_y = pipeline_dev(dev_data, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
 test_X = pipeline_test(test_data, bow_vectorizer,tfreq_vectorizer, tfidf_vectorizer)
-test_y = get_stances_from_csv(test_stances_file)
+
 print('training  data...')
 
-clf = LinearSVC(C=10, max_iter=100, dual=False)
-clf.fit(train_X, train_y)
-pred_y = clf.predict(test_X)
-print(report_score(test_y, pred_y))
+print(train_y)

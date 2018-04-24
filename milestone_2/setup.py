@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+# import tensorflow as tf
 
 # Initializing global data structures
 stance_label = {'agree': 0, 'disagree': 1, 'discuss': 2, 'unrelated': 3}
@@ -51,13 +52,13 @@ class FNCData:
         self.instances = self.read(file_instances)
 
         for instance in self.instances:
-            if instance['Headline'] not in self.headers:
-                header_id = len(self.headers)
-                self.headers[instance['Headline']] = header_id
-            instance['Body ID'] = int(instance['Body ID'])
+        	if instance['Headline'] not in self.headers:
+        		header_id = len(self.headers)
+        		self.headers[instance['Headline']] = header_id
+        	instance['Body ID'] = int(instance['Body ID'])
 
         for body in bodies:
-            self.bodies[int(body['Body ID'])] = body['articleBody']
+        	self.bodies[int(body['Body ID'])] = body['articleBody']
 
     def read(self, filename):
         """
@@ -111,6 +112,8 @@ def create_vectors(train, dev, test, lim_unigram):
     heads_unique = {}
     bodies_unique_id = {}
 
+    body_ids = []
+
     for instance in train.instances:
         h = instance['Headline']
         b_id = instance['Body ID']
@@ -120,6 +123,7 @@ def create_vectors(train, dev, test, lim_unigram):
         if b_id not in bodies_unique_id:
             bodies_train.append(train.bodies[b_id])
             bodies_unique_id[b_id] = 1
+            body_ids.append(b_id)
 
     for instance in dev.instances:
         h = instance['Headline']
@@ -130,6 +134,7 @@ def create_vectors(train, dev, test, lim_unigram):
         if b_id not in bodies_unique_id:
             bodies_dev.append(dev.bodies[b_id])
             bodies_unique_id[b_id] = 1
+            body_ids.append(b_id)
 
     for instance in test.instances:
         h = instance['Headline']
@@ -140,6 +145,7 @@ def create_vectors(train, dev, test, lim_unigram):
         if b_id not in bodies_unique_id:
             bodies_test.append(test.bodies[b_id])
             bodies_unique_id[b_id] = 1
+            body_ids.append(b_id)
 
     # create vectorizers using the appropriate data set(s)
     bow_vectorizer = CountVectorizer(max_features=lim_unigram, stop_words=stop_words)
@@ -167,6 +173,9 @@ def pipeline_train(train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
         train_set: list, of numpy arrays
         train_stances: list, of ints
     """
+
+    heads = []
+    bodies = []
 
     heads_unique = {}
     bodies_unique_id = {}
@@ -226,6 +235,8 @@ def pipeline_dev(dev, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
         dev_set: list, of numpy arrays
         dev_stances: list, of ints
     """
+    heads = []
+    bodies = []
 
     heads_unique = {}
     bodies_unique_id = {}
@@ -281,16 +292,13 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     Returns:
         test_set: list, of numpy arrays
     """
-
-    heads_unique = {}
-    bodies_unique_id = {}
-    cos_unique = {}
-
-    test_X = []
+    test = []
+    headers_track = {}
+    bodies_track = {}
+    cosines = {}
 
     # iterate over each header/body (id)
     for instance in test.instances:
-<<<<<<< HEAD:milestone_2/setup.py
     	header = instance['Headline']
     	body_id = instance['Body ID']
     	# get tf and tfidf for header
@@ -299,39 +307,31 @@ def pipeline_test(test, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer):
     		header_tf = tfreq_vectorizer.transform(header_count).toarray()[0].reshape(1, -1)
     		header_tfidf = tfidf_vectorizer.transform([header]).toarray().reshape(1, -1)
             headers_track[header] = (header_tf, header_tfidf)
-=======
-
-        head = instance['Headline']
-        b_id = instance['Body ID']
-
-        # create TF and TF-IDF vectors for heads and bodies
-        if head not in heads_unique:
-            head_bow = bow_vectorizer.transform([head]).toarray()
-            head_tf = tfreq_vectorizer.transform(head_bow).toarray()[0].reshape(1, -1)
-            head_tfidf = tfidf_vectorizer.transform([head]).toarray().reshape(1, -1)
-            heads_unique[head] = (head_tf, head_tfidf)
->>>>>>> 44b4239b84bf9d683a8276ea4dc0b4e19f64cda1:milestone_3/setup.py
         else:
-            head_tf = heads_unique[head][0]
-            head_tfidf = heads_unique[head][1]
-        if b_id not in bodies_unique_id:
-            body_bow = bow_vectorizer.transform([test.bodies[b_id]]).toarray()
-            body_tf = tfreq_vectorizer.transform(body_bow).toarray()[0].reshape(1, -1)
-            body_tfidf = tfidf_vectorizer.transform([test.bodies[b_id]]).toarray().reshape(1, -1)
-            bodies_unique_id[b_id] = (body_tf, body_tfidf)
-        else:
-            body_tf = bodies_unique_id[b_id][0]
-            body_tfidf = bodies_unique_id[b_id][1]
-        if (head, b_id) not in cos_unique:
-            tfidf_cos = cosine_similarity(head_tfidf, body_tfidf)[0].reshape(1, 1)
-            cos_unique[(head, b_id)] = tfidf_cos
-        else:
-            tfidf_cos = cos_unique[(head, b_id)]
+        	header_tf = headers_track[header][0]
+            header_tfidf = headers_track[header][1]
 
-        vect = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
-        test_X.append(vect)
+        # get tf and tfidf for body
+        if body_id not in bodies_track:
+        	body_count = bow_vectorizer.transform([test.bodies[body_id]]).toarray()
+        	body_tf = tfreq_vectorizer.transform(body_count).toarray()[0].reshape(1, -1)
+        	body_tfidf = tfidf_vectorizer.transform([test.bodies[body_id]]).toarray().reshape(1, -1)
+            bodies_track[body_id] = (body_tf, body_tfidf)
+        else:
+        	body_tf = bodies_track[body_id][0]
+            body_tfidf = bodies_track[body_id][1]
 
-    return test_X
+        # get the cosine similarity for header and body tfidf
+        if (header, body_id) not in cosines:
+        	tfidf_cos = cosine_similarity(header_tfidf, body_tfidf)[0].reshape(1, 1)
+            cosines[(head, body_id)] = tfidf_cos
+        else:
+        	tfidf_cos = cosines[(head, body_id)]
+
+        feat_vec = np.squeeze(np.c_[head_tf, body_tf, tfidf_cos])
+        test.append(feat_vec)
+
+    return test
 
 def load_model(sess):
     """
@@ -358,3 +358,11 @@ def save_predictions(pred, file):
         writer.writeheader()
         for instance in pred:
             writer.writerow({'Stance': stance_label_rev[instance]})
+
+
+
+
+
+# # Process data sets
+# bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer = create_vectors(raw_train, raw_dev, raw_test, lim_unigram=5000)
+# train_x, train_Y = pipeline_train(raw_train, bow_vectorizer, tfreq_vectorizer, tfidf_vectorizer)
