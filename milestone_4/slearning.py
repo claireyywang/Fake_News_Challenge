@@ -3,7 +3,10 @@ import random
 # import all functions in setup module
 from extended_setup_two import *
 from evaluate import score_submission, report_score, get_stances_from_csv
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, RidgeClassifier, SGDClassifier, Perceptron
+from sklearn.naive_bayes import GaussianNB, BernoulliNB
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.svm import LinearSVC
 
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'
@@ -33,7 +36,19 @@ test_y = get_stances_from_csv(test_stances_file)
 
 # extract features and labels
 print('building model...')
-clf = LogisticRegression(penalty='l2')
+#clf = LogisticRegression(penalty='l2') # 77.09122577835838 on test
+#clf = LogisticRegression(penalty='l1') # 77.8314826910516 on test
+#clf = GaussianNB() # 41.96385804485086 on test
+#clf = BernoulliNB() # 49.87154365338559 on test
+#clf = LinearSVC(C=10, max_iter=100, dual=False) # 0.76 on test
+#clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt', max_depth=20) # 42.23383409536251 on test
+#clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt') #80.3004572175049 on test
+#clf = RidgeClassifier() # 75.28412802090138 on test
+#clf = GradientBoostingClassifier()
+#clf = SGDClassifier() 
+#clf = Perceptron()
+
+
 clf.fit(train_X, train_y)
 
 print('predicting test dataset..')
