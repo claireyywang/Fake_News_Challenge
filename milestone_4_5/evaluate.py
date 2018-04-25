@@ -22,7 +22,7 @@ def score_submission(gold_labels, test_labels):
             if g_stance != 'unrelated':
                 score += 0.50
         else:
-            print(g_stance, t_stance)
+            print(i, g_stance, t_stance)
         if g_stance in RELATED and t_stance in RELATED:
             score += 0.25
 
