@@ -7,6 +7,7 @@ from sklearn.linear_model import LogisticRegression, RidgeClassifier, SGDClassif
 from sklearn.naive_bayes import GaussianNB, BernoulliNB
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import LinearSVC
+from sklearn.ensemble import VotingClassifier
 
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'
@@ -36,33 +37,31 @@ test_y = get_stances_from_csv(test_stances_file)
 
 # extract features and labels
 print('building model...')
+
 #clf = LogisticRegression(penalty='l2') # 77.09122577835838 on test
-#clf = LogisticRegression(penalty='l1') # 77.8314826910516 on test
-#clf = GaussianNB() # 41.96385804485086 on test
-#clf = BernoulliNB() # 49.87154365338559 on test
-#clf = LinearSVC(C=10, max_iter=100, dual=False) # 0.76 on test
-#clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt', max_depth=20) # 42.23383409536251 on test
-#clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt') #80.3004572175049 on test
-# clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt', max_depth = 50) # 63.901589375136076 on test
-#clf = RandomForestClassifier(n_estimators = 50, max_features='sqrt') # on test
-#clf = RandomForestClassifier(n_estimators = 100, max_features='log2') # on test
-clf = RandomForestClassifier(n_estimators = 200) # on test
-#clf = RidgeClassifier() # 75.28412802090138 on test
-#clf = GradientBoostingClassifier() # too slow apparently... 
-#clf = SGDClassifier() # 78.11887655127367 on test
-#clf = Perceptron() #76.29000653167864 on test
+clf1 = LogisticRegression(penalty='l1') # 77.8314826910516 on test
+# clf = GaussianNB() # 41.96385804485086 on test
+# clf = BernoulliNB() # 49.87154365338559 on test
+clf3 = LinearSVC(C=10, max_iter=100, dual=False) # 0.76 on test
+clf2 = RandomForestClassifier(n_estimators = 100, max_features='sqrt') #80.3004572175049 on test
+clf4 = RidgeClassifier() # 75.28412802090138 on test
+#clf = GradientBoostingClassifier()
+clf5 = SGDClassifier()
+# clf6 = Perceptron()
+eclf = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('svc', clf3), ('rc', clf4), ('sgd', clf5)], weights=[1, 2, 1, 1, 1], voting='hard')
+eclf = eclf.fit(train_X, train_y)
 
 
-clf.fit(train_X, train_y)
+# clf.fit(train_X, train_y)
 
 print('predicting test dataset..')
 #test_pred = [LABELS[int(a)] for a in clf.predict(test_X)] # predicted labels
 #test_gt = [LABELS[int(a)] for a in test_y] # ground truth
-test_pred = clf.predict(test_X) # predicted labels
+test_pred = eclf.predict(test_X) # predicted labels
 test_gt = test_y # ground truth
 
 print('predicting dev dataset..')
-dev_pred = clf.predict(dev_X) # predicted labels
+dev_pred = eclf.predict(dev_X) # predicted labels
 dev_gt = dev_y # ground truth
 
 print('evaluating model performance...')
