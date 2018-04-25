@@ -1,6 +1,6 @@
 from extended_setup_two import *
 from evaluate import get_stances_from_csv , report_score
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifieir
 
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'

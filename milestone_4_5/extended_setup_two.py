@@ -7,7 +7,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from extensions import generate_extended_features
+from extension1 import generate_extended_features
 
 # Initializing global data structures
 stance_label = {'agree': 0, 'disagree': 1, 'discuss': 2, 'unrelated': 3}
