@@ -1,0 +1,108 @@
+label distributions
+train
+agree        3678 (7.36%)
+disagree      840 (1.68%)
+discuss      8909 (17.83%)
+unrelated   36545 (73.13%)
+
+dev
+agree         944 (7.32%)
+disagree      377 (2.92%)
+discuss      2260 (17.52%)
+unrelated    9316 (72.23%)
+
+test
+agree         959 (7.66%)
+disagree      320 (2.56%)
+discuss      2204 (17.61%)
+unrelated    9033 (72.17%)
+
+headline frequencies
+agree
+man           434
+isis          424
+woman         335
+video         298
+hoax          286
+dead          253
+foley         248
+penis         244
+james         232
+president     212
+boy           197
+werewolf      181
+us            180
+death         177
+bear          173
+argentina     173
+journalist    170
+says          166
+bieber        166
+fake          164
+
+disagree
+woman         202
+third         138
+president     131
+werewolf      120
+breast        117
+man           112
+argentina     103
+jewish         91
+spider         85
+meteorite      75
+jobs           69
+steve          68
+god            67
+fake           66
+surgery        66
+video          64
+claims         64
+men            64
+christian      63
+bale           63
+
+discuss
+isis         2422
+journalist   1028
+foley         995
+report        959
+apple         959
+video         953
+james         892
+state         878
+islamic       878
+reportedly    820
+claims        745
+says          739
+american      725
+michael       713
+us            704
+brown         648
+boko          645
+haram         645
+audio         629
+beheading     621
+
+unrelated
+isis         7572
+apple        3603
+foley        3022
+video        3011
+report       2991
+woman        2755
+james        2654
+journalist   2639
+man          2497
+state        2491
+says         2473
+claims       2459
+islamic      2373
+watch        2208
+us           2184
+michael      2144
+american     2068
+reportedly   1971
+kim          1833
+leader       1807
+
