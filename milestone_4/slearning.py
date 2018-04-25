@@ -72,3 +72,6 @@ test_res = report_score(test_gt,test_pred)
 print('===============================')
 print('Dev Dataset Performance:')
 dev_res = report_score(dev_gt, dev_pred)
+
+save_predictions(dev_pred, dev_pred_file)
+save_predictions(test_pred, test_pred_file)
