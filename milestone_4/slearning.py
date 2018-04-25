@@ -43,10 +43,14 @@ print('building model...')
 #clf = LinearSVC(C=10, max_iter=100, dual=False) # 0.76 on test
 #clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt', max_depth=20) # 42.23383409536251 on test
 #clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt') #80.3004572175049 on test
+# clf = RandomForestClassifier(n_estimators = 100, max_features='sqrt', max_depth = 50) # 63.901589375136076 on test
+#clf = RandomForestClassifier(n_estimators = 50, max_features='sqrt') # on test
+#clf = RandomForestClassifier(n_estimators = 100, max_features='log2') # on test
+clf = RandomForestClassifier(n_estimators = 200) # on test
 #clf = RidgeClassifier() # 75.28412802090138 on test
-#clf = GradientBoostingClassifier()
-#clf = SGDClassifier() 
-#clf = Perceptron()
+#clf = GradientBoostingClassifier() # too slow apparently... 
+#clf = SGDClassifier() # 78.11887655127367 on test
+#clf = Perceptron() #76.29000653167864 on test
 
 
 clf.fit(train_X, train_y)
