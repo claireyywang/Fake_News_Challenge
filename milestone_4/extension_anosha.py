@@ -51,7 +51,6 @@ clf5 = SGDClassifier()
 eclf = VotingClassifier(estimators=[('lr', clf1), ('rf', clf2), ('svc', clf3), ('rc', clf4), ('sgd', clf5)], weights=[1, 2, 1, 1, 1], voting='hard')
 eclf = eclf.fit(train_X, train_y)
 
-
 # clf.fit(train_X, train_y)
 
 print('predicting test dataset..')
