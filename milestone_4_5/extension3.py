@@ -1,6 +1,6 @@
 from extended_setup_two import *
 from evaluate import get_stances_from_csv , report_score
-from sklearn.svm import LinearSVC
+from sklearn.ensemble import RandomForestClassifier
 
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'
@@ -26,8 +26,8 @@ dev_X, dev_y = pipeline_dev(dev_data, bow_vectorizer, tfreq_vectorizer, tfidf_ve
 test_X = pipeline_test(test_data, bow_vectorizer,tfreq_vectorizer, tfidf_vectorizer)
 test_y = get_stances_from_csv(test_stances_file)
 print('training  data...')
+clf = RandomForestClassifier(n_estimators = 200) # on test
 
-clf = LinearSVC(C=10, max_iter=100, dual=False)
 clf.fit(train_X, train_y)
 pred_y = clf.predict(test_X)
 print(report_score(test_y, pred_y))
