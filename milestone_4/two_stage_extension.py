@@ -2,7 +2,6 @@ from extended_setup import *
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 
-
 tr_stances_file = '../dataset/train_stances.csv'
 tr_bodies_file = '../dataset/train_bodies.csv'
 dev_stances_file = '../dataset/dev_stances.csv'
@@ -77,11 +76,13 @@ print('dev stage 1 f1 score {}'.format(f1_score(dev_y_stage_one, dev_y_pred_stag
 
 # we now focus only on examples we predicted to be related
 dev_X_stage_two = []
+dev_X_stage_two_indices = []
 # we also keep track of the corresponding y's
 dev_y_stage_two = []
 for i, yi in enumerate(dev_y_pred_stage_one):
     if stage_one_map_rev[yi] == 'related':
         dev_X_stage_two.append(dev_X[i])
+        dev_X_stage_two_indices.append(i)
         dev_y_stage_two.append(dev_y[i])
 dev_X_stage_two = np.array(dev_X_stage_two)
 dev_y_stage_two = np.array(dev_y_stage_two)
@@ -90,10 +91,20 @@ dev_y_pred_stage_two = clf_stage_two.predict(dev_X_stage_two)
 
 print('dev stage 2 f1 score {}'.format(f1_score(dev_y_stage_two, dev_y_pred_stage_two, average='micro')))
 
+# output the dev prediction file
+dev_all_preds = np.full(len(dev_X), stance_label['unrelated'])
+for dev_X_index, pred in zip(dev_X_stage_two_indices, dev_y_pred_stage_two):
+    dev_all_preds[dev_X_index] = pred
+
+with open('dev_preds.txt', 'w') as f:
+    f.write('Stance\n')
+    for pred in dev_all_preds:
+        f.write(stance_label_rev[pred] + '\n')
+
 # predict test set
 
 # we start by assuming that everything is unrelated
-all_preds = np.full(len(test_X), stance_label['unrelated'])
+test_all_preds = np.full(len(test_X), stance_label['unrelated'])
 
 train_y_pred_stage_one = clf_stage_one.predict(test_X)
 
@@ -109,9 +120,9 @@ test_X_stage_two_indices = np.array(test_X_stage_two_indices)
 
 test_y_stage_two_pred = clf_stage_two.predict(test_X_stage_two)
 for test_X_index, pred in zip(test_X_stage_two_indices, test_y_stage_two_pred):
-    all_preds[test_X_index] = pred
+    test_all_preds[test_X_index] = pred
 
 with open('test_preds.txt', 'w') as f:
     f.write('Stance\n')
-    for pred in all_preds:
+    for pred in test_all_preds:
         f.write(stance_label_rev[pred] + '\n')
