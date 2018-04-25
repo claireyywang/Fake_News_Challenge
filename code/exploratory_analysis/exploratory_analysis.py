@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 import string
 import nltk
 from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 if len(sys.argv) != 2:
     print('usage python3 exploratory_analysis.py <dataset folder>')
@@ -61,3 +62,29 @@ for label, words in label_word_counts.items():
 
     wc = WordCloud(width=800, height=400).generate_from_frequencies(words)
     wc.to_file(label + '-headlines.png')
+
+# headline word count histogram
+counts = []
+for stances, _ in datasets.values():
+    for stance in stances:
+        counts.append(len(stance['Headline'].split()))
+
+plt.hist(counts, bins=20)
+plt.xlabel('Count')
+plt.ylabel('Frequency')
+plt.title('Histogram of Article Headline Word Counts')
+plt.savefig('headline-histogram.png', bbox_inches='tight', dpi=300)
+plt.clf()
+
+# headline word count histogram
+counts = []
+for _, bodies in datasets.values():
+    for body in bodies:
+        counts.append(len(body['articleBody'].split()))
+
+plt.hist(counts, bins=20)
+plt.xlabel('Count')
+plt.ylabel('Frequency')
+plt.title('Histogram of Article Body Word Counts')
+plt.savefig('body-histogram.png', bbox_inches='tight', dpi=300)
+plt.clf()
