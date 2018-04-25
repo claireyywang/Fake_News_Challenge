@@ -1,0 +1,612 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>Mapping Gun Violence</title>
+  <link rel='icon' href="/static/favicon.ico"/>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+  <style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, Sans-serif;
+  }
+
+  #map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 20px;
+    line-height: 30px;
+  }
+
+  h2 {
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 10px;
+  }
+
+  a {
+    text-decoration: none;
+    color: #FFB700;
+  }
+
+  #console {
+    position: absolute;
+    margin: 10px;
+    width: 360px;
+    background-color: white;
+    padding: 10px 20px;
+    overflow: auto;
+    max-height: 95vh;
+  }
+
+  .session {
+    margin-bottom: 20px;
+  }
+
+  .row {
+    height: 12px;
+    width: 100%;
+  }
+
+  .colors {
+    background: linear-gradient(to right, #FFEDA0, #FED976, #FEB24C, #FD8D3C, #FC4E2A, #E31A1C, #BD0026, #800026);
+    margin-bottom: 5px;
+  }
+
+  .label {
+    width: 11%;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .mapboxgl-popup {
+    max-width: 400px;
+    max-height: 500px;
+    font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  }
+  .mapboxgl-popup-content {
+    overflow: auto !important;
+  }
+  </style>
+</head>
+
+<body>
+  <div id='map'></div>
+  <div id='console'>
+    <h1>Mapping Gun Violence</h1>
+    <p>Using machine learning to extract key information from gun violence articles
+       and enable research and advocacy. Predictions may be inaccurate.</p>
+    <div class='session'>
+      <p><a href="{{ url_for('download') }}">Download</a> raw data.
+      Read more on <a href="{{ url_for('about') }}">about page</a>.</p>
+    </div>
+    <div class='session'>
+      <h2>Incidents</h2>
+      <div class='row colors'>
+      </div>
+      <div class='row labels'>
+        <div class='label'>0</div>
+        <div class='label'>10</div>
+        <div class='label'>20</div>
+        <div class='label'>50</div>
+        <div class='label'>100</div>
+        <div class='label'>200</div>
+        <div class='label'>500</div>
+        <div class='label'>1000+</div>
+      </div>
+    </div>
+    <div class='section'>
+      <h2 id='year-filter'>
+        Filter by year: <input id='year-filter-checkbox' type='checkbox' onclick='checkFilterByYear()'>
+      </h2>
+      <h2 id='month-filter' style='display:none'>
+        Filter by month: <input id='month-filter-checkbox' type='checkbox' onclick='checkFilterByMonth()'>
+      </h2>
+    </div>
+    <div id='year-session' class='session' style='display:none'>
+      <h2>Year: <label id='active-year'>2018</label></h2>
+      <input id='year-slider' class='row' type='range' min='2015' max='2018' step='1' value='2018' />
+    </div>
+    <div id='month-session' class='session' style='display:none'>
+      <h2>Month: <label id='active-month'>January</label></h2>
+      <input id='month-slider' class='row' type='range' min='0' max='11' step='1' value='0' />
+    </div>
+    <div id='circumstances'>
+      <div class='session'>
+        <h2>Shooter-victim relationship</h2>
+        <div class='row' id='relationship'>
+          <input id='knewEachOther' type='checkbox' value='knewEachOther'>
+          <label for='knewEachOther'>Knew each other</label>
+          <input id='domesticViolence' type='checkbox' value='domesticViolence'>
+          <label for='domesticViolence'>Domestic violence</label>
+        </div>
+      </div>
+      <div class='session'>
+        <h2>Firearm use</h2>
+        <div class='row' id='use'>
+          <input id='anotherCrime' type='checkbox' value='anotherCrime'>
+          <label for='anotherCrime'>During another crime</label>
+          <input id='selfDefense' type='checkbox' value='selfDefense'>
+          <label for='selfDefense'>In self defense</label>
+        </div>
+      </div>
+      <div class='session'>
+        <h2>Substances involved</h2>
+        <div class='row' id='substances'>
+          <input id='alcohol' type='checkbox' value='alcohol'>
+          <label for='alcohol'>Alcohol</label>
+          <input id='drugs' type='checkbox' value='drugs'>
+          <label for='drugs'>Drugs (other than alcohol)</label>
+        </div>
+      </div>
+      <div class='session'>
+        <h2>Shooting intention</h2>
+        <div class='row' id='intention'>
+          <input id='selfDirected' type='checkbox' value='selfDirected'>
+          <label for='selfDirected'>Self-directed</label>
+          <input id='suicideOrAttempt' type='checkbox' value='suicideOrAttempt'>
+          <label for='suicideOrAttempt'>Suicide</label>
+          <input id='unintentional' type='checkbox' value='unintentional'>
+          <label for='unintentional'>Unintentional</label>
+        </div>
+      </div>
+      <div class='session'>
+        <h2>Police involvement</h2>
+        <div class='row' id='police'>
+          <input id='byOfficer' type='checkbox' value='byOfficer'>
+          <label for='byOfficer'>By a police officer</label>
+          <input id='atOfficer' type='checkbox' value='atOfficer'>
+          <label for='atOfficer'>At a police officer</label>
+        </div>
+      </div>
+      <div class='session'>
+        <h2>Firearm ownership</h2>
+        <div class='row' id='ownership'>
+          <input id='stolen' type='checkbox' value='stolen'>
+          <label for='stolen'>Stolen</label>
+          <input id='familyOwned' type='checkbox' value='familyOwned'>
+          <label for='familyOwned'>Owned by victim/victim's family</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src='//d3js.org/d3.v3.min.js' charset='utf-8'></script>
+  <script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2lqbmpqazdlMDBsdnRva284cWd3bm11byJ9.V6Hg2oYJwMAxeoR9GEzkAA';
+  var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v9',
+    center: [-107.7938316, 38.9764531],
+    zoom: 3.5
+  });
+
+  // Add zoom and rotation controls to the map.
+  map.addControl(new mapboxgl.NavigationControl());
+
+  var data;
+
+  var year;
+  var month;
+  var circumstances;
+
+  map.on('load', function() {
+    // Add the source to query. In this example we're using
+    // congressional district polygons uploaded as vector tiles
+    // Source: ftp://ftp2.census.gov/geo/tiger/TIGER2017/CD/
+    map.addSource('districts', {
+      type: 'vector',
+      url: 'mapbox://yoninachmany.cxcgq8gk'
+    });
+
+    map.addLayer({
+      id: 'districts',
+      type: 'fill',
+      source: 'districts',
+      'source-layer': 'tl_2017_us_cd115-ahrk3y',
+      paint: {
+        'fill-outline-color': 'rgba(0,0,0,0.5)',
+        'fill-color': 'rgba(0,0,0,0.1)'
+      }
+    });
+
+    map.addLayer({
+      id: 'districts-highlighted',
+      type: 'fill',
+      source: 'districts',
+      'source-layer': 'tl_2017_us_cd115-ahrk3y',
+      paint: {
+        'fill-outline-color': '#484896',
+        'fill-color': '#6e599f',
+        'fill-opacity': 0.5
+      },
+      filter: ['in', 'GEOID', '']
+    });
+
+    d3.json('/static/final-output.geojson', function(err, data) {
+      savedData = data;
+
+      // Add a new source from our GeoJSON data and set the
+      // 'cluster' option to true. GL-JS will add the point_count property to your source data.
+      map.addSource('shootings', {
+        type: 'geojson',
+        // Point to GeoJSON data.
+        data: filterBy(data, year, month, circumstances),
+        cluster: true,
+        clusterMaxZoom: 10, // Max zoom to cluster points on
+        clusterRadius: 50 // Radius of each cluster when clustering points (defaults to 50)
+      });
+
+      map.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'shootings',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            '#FFEDA0',
+            10,
+            '#FED976',
+            20,
+            '#FEB24C',
+            50,
+            '#FD8D3C',
+            100,
+            '#FC4E2A',
+            200,
+            '#E31A1C',
+            500,
+            '#BD0026',
+            1000,
+            '#800026'
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            10,
+            22.5,
+            20,
+            25,
+            50,
+            27.5,
+            100,
+            30,
+            200,
+            32.5,
+            500,
+            35,
+            1000,
+            37.5
+          ],
+        }
+      });
+
+      map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'shootings',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        }
+      });
+
+      map.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'shootings',
+        filter: ['!has', 'point_count'],
+        paint: {
+          'circle-color': '#11b4da',
+          'circle-radius': 8,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
+        }
+      });
+
+      // update year filter when the year slider is dragged
+      document.getElementById('year-slider').addEventListener('input', function(e) {
+        year = parseInt(e.target.value);
+        // update the map
+        map.getSource('shootings').setData(filterBy(data, year, month, circumstances));
+
+        // update text in the UI
+        document.getElementById('active-year').innerText = year;
+      });
+
+      var months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+      ];
+
+      // update month filter when the month slider is dragged
+      document.getElementById('month-slider').addEventListener('input', function(e) {
+        month = parseInt(e.target.value);
+        // update the map
+        map.getSource('shootings').setData(filterBy(data, year, month, circumstances));
+
+        // update text in the UI
+        document.getElementById('active-month').innerText = months[month];
+      });
+
+      document.getElementById('circumstances').addEventListener('change', function(e) {
+        var checkedBoxes = Array.from(document.querySelectorAll('#circumstances input[type=checkbox]:checked'));
+        circumstances = checkedBoxes.map(x => x.value);
+        map.getSource('shootings').setData(filterBy(data, year, month, circumstances));
+      });
+    });
+  });
+
+  var popup = new mapboxgl.Popup({
+    closeButton: false
+  });
+
+  var state_abvs = {
+    '30': 'MT', '54': 'WV', '42': 'PA', '48': 'TX', '45': 'SC', '50': 'VT',
+    '60': 'AS', '49': 'UT', '66': 'GU', '69': 'MP', '53': 'WA', '02': 'AK',
+    '25': 'MA', '26': 'MI', '01': 'AL', '06': 'CA', '21': 'KY', '04': 'AZ',
+    '05': 'AR', '46': 'SD', '47': 'TN', '08': 'CO', '09': 'CT', '28': 'MS',
+    '29': 'MO', '40': 'OK', '41': 'OR', '51': 'VA', '24': 'MD', '56': 'WY',
+    '39': 'OH', '27': 'MN', '72': 'PR', '20': 'KS', '38': 'ND', '78': 'VI',
+    '11': 'DC', '10': 'DE', '13': 'GA', '12': 'FL', '15': 'HI', '22': 'LA',
+    '17': 'IL', '16': 'ID', '19': 'IA', '18': 'IN', '31': 'NE', '23': 'ME',
+    '37': 'NC', '36': 'NY', '35': 'NM', '34': 'NJ', '33': 'NH', '55': 'WI',
+    '74': 'UM', '32': 'NV', '44': 'RI'
+  };
+
+  map.on('mousemove', 'districts', function(e) {
+    // Single out the first found feature.
+    var feature = e.features[0];
+
+    // Add the feature with the district id to the highlighted layer.
+    map.setFilter('districts-highlighted', ['in', 'GEOID', feature.properties.GEOID]);
+
+    // Display a popup with the name of the district
+    popup.setLngLat(e.lngLat)
+      .setText(state_abvs[feature.properties.STATEFP] + '-' + feature.properties.CD115FP)
+      .addTo(map);
+  });
+
+  map.on('mouseleave', 'counties', function() {
+    popup.remove();
+    map.setFilter('districts-highlighted', ['in', 'GEOID', '']);
+  });
+
+  // When a click event occurs on a feature in the clusters layer, zoom in.
+  map.on('click', 'clusters', function (e) {
+    map.flyTo({center: e.features[0].geometry.coordinates, zoom: map.getZoom() + 4});
+
+    var coordinates = e.features[0].geometry.coordinates.slice();
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+  });
+
+  // When a click event occurs on a feature in the unclustered-point layer, open a popup at the
+  // location of the feature, with description HTML from its properties.
+  map.on('click', 'unclustered-point', function (e) {
+    map.flyTo({center: e.features[0].geometry.coordinates});
+
+    var coordinates = e.features[0].geometry.coordinates.slice();
+
+    var articlesInfo = "<ol>";
+
+    for (i = 0; i < e.features.length; i++) {
+      var articleUrl = e.features[i].properties.articleUrl;
+      var articleTitle = e.features[i].properties.articleTitle;
+      articlesInfo = articlesInfo.concat("<li><a href=", articleUrl, " target=\"_blank\">", articleTitle, "</a>");
+
+      var incidentInfo = "<br>"
+      console.log(incidentInfo.length);
+
+      var props = e.features[i].properties;
+      if (props.knewEachOther === 1) {
+        incidentInfo = incidentInfo.concat("Knew each other, ");
+      }
+
+      if (props.domesticViolence===1) {
+        incidentInfo = incidentInfo.concat("Domestic violence, ");
+      }
+
+      if (props.anotherCrime===1) {
+        incidentInfo = incidentInfo.concat(" During another crime, ");
+      }
+
+      if (props.selfDefense===1) {
+        incidentInfo = incidentInfo.concat("In self-defense, ");
+      }
+
+      if (props.alcohol===1) {
+        incidentInfo = incidentInfo.concat("Alcohol involved, ");
+      }
+
+      if (props.drugs===1) {
+        incidentInfo = incidentInfo.concat("Drugs involved, ");
+      }
+
+      if (props.selfDirected===1) {
+        incidentInfo = incidentInfo.concat("Self-directed, ");
+      }
+
+      if (props.suicideOrAttempt===1) {
+        incidentInfo = incidentInfo.concat("Suicide or attempt, ");
+      }
+
+      if (props.unintentional===1) {
+        incidentInfo = incidentInfo.concat("Unintentional, ");
+      }
+
+      if (props.byOfficer===1) {
+        incidentInfo = incidentInfo.concat("By police officer, ");
+      }
+
+      if (props.atOfficer===1) {
+        incidentInfo = incidentInfo.concat("At police officer, ");
+      }
+
+      if (props.stolen==1) {
+        incidentInfo = incidentInfo.concat("By stolen gun, ");
+      }
+
+      if (familyOwned.stolen===1) {
+        incidentInfo = incidentInfo.concat("By family-owned gun, ");
+      }
+
+      console.log(incidentInfo.length);
+
+      if (incidentInfo.length > 4) {
+        articlesInfo = articlesInfo.concat(incidentInfo);
+        articlesInfo = articlesInfo.slice(0, -2);
+      }
+
+    }
+    articlesInfo = articlesInfo.concat("</li></ol>")
+    console.log(articlesInfo);
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+
+    new mapboxgl.Popup()
+      .setLngLat(coordinates)
+      .setHTML(articlesInfo)
+      .addTo(map);
+  });
+
+  // Change the cursor to a pointer when the mouse is over the clusters layer.
+  map.on('mouseenter', 'clusters', function () {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+
+  // Change it back to a pointer when it leaves.
+  map.on('mouseleave', 'clusters', function () {
+    map.getCanvas().style.cursor = '';
+  });
+
+  // Change the cursor to a pointer when the mouse is over the unclustered-point layer.
+  map.on('mouseenter', 'unclustered-point', function () {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+
+  // Change it back to a pointer when it leaves.
+  map.on('mouseleave', 'unclustered-point', function () {
+    map.getCanvas().style.cursor = '';
+  });
+
+  // This will let you use the .remove() function later on
+  if (!('remove' in Element.prototype)) {
+    Element.prototype.remove = function() {
+      if (this.parentNode) {
+        this.parentNode.removeChild(this);
+      }
+    };
+  }
+
+  function filterBy(data, year, month, circumstances) {
+    var popUps = document.getElementsByClassName('mapboxgl-popup');
+    // Check if there is already a popup on the map and if so, remove it
+    if (popUps[0]) popUps[0].remove();
+
+    var features = data.features;
+    if (year != null) {
+      features = features.filter(feature => new Date(feature.properties.date).getFullYear() === year);
+    }
+    if (month != null) {
+      features = features.filter(feature => new Date(feature.properties.date).getMonth() === month);
+    }
+    if (circumstances != null) {
+      features = features.filter(feature => {
+        for (var i = 0; i < circumstances.length; i++) {
+          if (feature.properties[circumstances[i]] !== "Yes" && feature.properties[circumstances[i]] !== 1) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+    var featureCollection = {"type": "FeatureCollection", "features": features};
+    return featureCollection;
+  }
+
+  function checkFilterByYear() {
+    var yearCheckBox = document.getElementById("year-filter-checkbox");
+    var monthFilter = document.getElementById("month-filter");
+    var monthCheckBox = document.getElementById("month-filter-checkbox");
+
+    var yearSession = document.getElementById("year-session");
+    var monthSession = document.getElementById("month-session");
+
+    if (yearCheckBox.checked == true) {
+      monthFilter.style.display = "block";
+      yearSession.style.display = "block";
+
+      year = 2018;
+      map.getSource('shootings').setData(filterBy(savedData, year, month, circumstances));
+    } else {
+      monthFilter.style.display = "none";
+      monthCheckBox.checked = false;
+
+      yearSession.style.display = "none";
+      monthSession.style.display = "none";
+
+      month = null;
+      year = null;
+      map.getSource('shootings').setData(filterBy(savedData, year, month, circumstances));
+    }
+  }
+
+  function checkFilterByMonth() {
+    var monthFilter = document.getElementById("month-filter");
+    var monthCheckBox = document.getElementById("month-filter-checkbox");
+
+    var monthSession = document.getElementById("month-session");
+
+    if (monthCheckBox.checked == true) {
+      monthSession.style.display = "block";
+
+      month = 0;
+      map.getSource('shootings').setData(filterBy(savedData, year, month, circumstances));
+    } else {
+      monthCheckBox.checked = false;
+
+      monthSession.style.display = "none";
+
+      month = null;
+      map.getSource('shootings').setData(filterBy(savedData, year, month, circumstances));
+    }
+  }
+  </script>
+</body>
+
+</html>
